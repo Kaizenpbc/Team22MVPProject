@@ -105,8 +105,9 @@ const CentralisedAccessButton: React.FC = () => {
           e.preventDefault(); // Prevent default navigation
           const userName = user.user_metadata?.full_name || user.email || 'User';
           const userEmail = user.email || '';
-          // Go directly to the SOP platform
-          const urlWithParams = `https://outskills-project.netlify.app/final-beautiful.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&direct=true`;
+          // Go directly to the SOP platform with timestamp to bypass cache
+          const timestamp = Date.now();
+          const urlWithParams = `https://outskills-project.netlify.app/final-beautiful.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&direct=true&t=${timestamp}`;
           console.log('Opening SOP with params:', urlWithParams);
           window.open(urlWithParams, '_blank');
     } else {
