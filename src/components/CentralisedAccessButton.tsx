@@ -105,8 +105,8 @@ const CentralisedAccessButton: React.FC = () => {
           e.preventDefault(); // Prevent default navigation
           const userName = user.user_metadata?.full_name || user.email || 'User';
           const userEmail = user.email || '';
-          // Always go to root URL to get the welcome page
-          const urlWithParams = `https://outskills-project.netlify.app/index.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
+          // Go directly to the SOP platform
+          const urlWithParams = `https://outskills-project.netlify.app/final-beautiful.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
           console.log('Opening SOP with params:', urlWithParams);
           window.open(urlWithParams, '_blank');
     } else {
