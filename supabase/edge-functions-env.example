@@ -1,0 +1,13 @@
+# Supabase Edge Function Environment Variables
+# These are used by the send-booking-email Edge Function
+# Set these using: supabase secrets set KEY=value
+
+# Email provider API key (Resend.com)
+RESEND_API_KEY=re_your_api_key_here
+
+# Email sender address
+EMAIL_FROM=hello@opscentral.com
+
+# Team notification email address
+BOOKINGS_NOTIFY=team@opscentral.com
+

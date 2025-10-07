@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, User, Mail, Lock, Building } from 'lucide-react';
+import { signUp } from '../services/authService';
 
 const SignUp = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -18,6 +20,8 @@ const SignUp = () => {
 
   const [gdprConsent, setGdprConsent] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -61,12 +65,42 @@ const SignUp = () => {
     return !newErrors.fullName && !newErrors.email && !newErrors.password && gdprConsent;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      // Placeholder for sign-up logic
-      console.log('Sign up attempt:', { ...formData, gdprConsent, marketingConsent });
-      alert('Sign-up functionality will be implemented with backend integration');
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setErrors({ fullName: '', email: '', password: '' });
+    setSuccessMessage('');
+
+    const { data, error } = await signUp({
+      email: formData.email,
+      password: formData.password,
+      fullName: formData.fullName,
+      department: formData.department,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      // Handle specific error messages
+      if (error.includes('already registered')) {
+        setErrors(prev => ({ ...prev, email: 'This email is already registered' }));
+      } else {
+        setErrors(prev => ({ ...prev, password: error }));
+      }
+      return;
+    }
+
+    if (data) {
+      if (data.user && !data.user.email_confirmed_at) {
+        setSuccessMessage('Account created! Please check your email and click the confirmation link, then come back to sign in.');
+      } else {
+        setSuccessMessage('Account created successfully! You can now sign in.');
+        setTimeout(() => {
+          navigate('/signin');
+        }, 2000);
+      }
     }
   };
 
@@ -84,6 +118,12 @@ const SignUp = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {successMessage && (
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <p className="text-sm text-green-800 dark:text-green-200">{successMessage}</p>
+              </div>
+            )}
+
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Full Name
@@ -221,15 +261,15 @@ const SignUp = () => {
             
             <button
               type="submit"
-              disabled={!gdprConsent}
+              disabled={!gdprConsent || loading}
               className={`group w-full inline-flex justify-center items-center px-8 py-4 font-semibold rounded-lg transition-all duration-300 gap-2 shadow-lg ${
-                gdprConsent
+                gdprConsent && !loading
                   ? 'bg-accent-600 hover:bg-accent-700 text-white hover:shadow-xl transform hover:-translate-y-1'
                   : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
               }`}
             >
-              Create Account
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              {loading ? 'Creating Account...' : 'Create Account'}
+              {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
             </button>
           </form>
 

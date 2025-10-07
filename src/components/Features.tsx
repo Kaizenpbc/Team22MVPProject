@@ -49,7 +49,6 @@ const Features = () => {
             return (
               <div 
                 key={index}
-                className="group p-8 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
                 className="group p-6 sm:p-8 bg-white dark:bg-gray-900 rounded-xl border-4 border-primary-600 dark:border-primary-600 hover:border-primary-500 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="inline-flex p-3 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 mb-4 group-hover:scale-110 transition-transform duration-300">

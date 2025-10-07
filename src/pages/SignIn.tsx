@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Mail, Lock } from 'lucide-react';
+import { signIn } from '../services/authService';
 
 const SignIn = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -12,6 +14,9 @@ const SignIn = () => {
     email: '',
     password: ''
   });
+
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -51,12 +56,29 @@ const SignIn = () => {
     return !newErrors.email && !newErrors.password;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      // Placeholder for sign-in logic
-      console.log('Sign in attempt:', formData);
-      alert('Sign-in functionality will be implemented with backend integration');
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setErrors({ email: '', password: '' });
+    setErrorMessage('');
+
+    const { data, error } = await signIn({
+      email: formData.email,
+      password: formData.password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setErrorMessage(error);
+      return;
+    }
+
+    if (data) {
+      // Redirect to home page on successful login
+      navigate('/');
     }
   };
 
@@ -74,6 +96,12 @@ const SignIn = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {errorMessage && (
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-200">{errorMessage}</p>
+              </div>
+            )}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Email Address
@@ -122,10 +150,15 @@ const SignIn = () => {
 
             <button
               type="submit"
-              className="group w-full inline-flex justify-center items-center px-8 py-4 bg-accent-600 hover:bg-accent-700 text-white font-semibold rounded-lg transition-all duration-300 gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              disabled={loading}
+              className={`group w-full inline-flex justify-center items-center px-8 py-4 font-semibold rounded-lg transition-all duration-300 gap-2 shadow-lg ${
+                loading
+                  ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                  : 'bg-accent-600 hover:bg-accent-700 text-white hover:shadow-xl transform hover:-translate-y-1'
+              }`}
             >
-              Sign In
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              {loading ? 'Signing In...' : 'Sign In'}
+              {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
             </button>
           </form>
 

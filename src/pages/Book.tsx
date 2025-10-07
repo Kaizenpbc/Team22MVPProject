@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, Mail, MessageSquare, Check, ArrowLeft, ExternalLink, Globe } from 'lucide-react';
+import { Calendar, Clock, User, MessageSquare, Check, ArrowLeft, ExternalLink, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import { createBooking, getAllConfirmedBookings } from '../services/bookingService';
 
 interface TimeSlot {
   time: string;
@@ -130,6 +131,18 @@ const Book = () => {
     }
   }, [dates, selectedDate]);
 
+  // State for existing bookings from Supabase
+  const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
+
+  // Load existing bookings from Supabase
+  useEffect(() => {
+    const loadBookings = async () => {
+      const bookings = await getAllConfirmedBookings();
+      setExistingBookings(bookings);
+    };
+    loadBookings();
+  }, []);
+
   // Generate time slots with pre-blocked slots
   const generateTimeSlots = (date: string): TimeSlot[] => {
     const times = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
@@ -147,9 +160,6 @@ const Book = () => {
     ];
 
     const blocked = blockedSlots[dateIndex] || [1, 4, 7];
-
-    // Check for existing bookings
-    const existingBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
     
     return times.map((time, index) => {
       // Check if slot is pre-blocked
@@ -212,7 +222,7 @@ const Book = () => {
     
     if (name.startsWith('painPoints.')) {
       const field = name.split('.')[1];
-      setFormData(prev => ({
+      setFormData((prev: typeof formData) => ({
         ...prev,
         painPoints: {
           ...prev.painPoints,
@@ -220,7 +230,7 @@ const Book = () => {
         }
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev: typeof formData) => ({
         ...prev,
         [name]: value
       }));
@@ -259,10 +269,14 @@ const Book = () => {
       const localStartTime = convertFromUTC(new Date(booking.utcStart), booking.timezoneSelected);
       const utcStartTime = new Date(booking.utcStart);
       
-      const response = await fetch('/api/send-booking-email', {
+      // Get Supabase URL from environment
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      
+      const response = await fetch(`${supabaseUrl}/functions/v1/send-booking-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
           booking: {
@@ -293,9 +307,8 @@ const Book = () => {
       const localDateTime = new Date(`${selectedDate}T${selectedTime}:00`);
       const utcStart = convertToUTC(localDateTime, selectedTimezone);
 
-      // Create booking
-      const booking: Booking = {
-        id: `booking_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      // Create booking in Supabase
+      const booking = await createBooking({
         fullName: formData.fullName,
         email: formData.email,
         notes: formData.notes,
@@ -305,17 +318,18 @@ const Book = () => {
         timezoneSelected: selectedTimezone,
         utcStart: utcStart.toISOString(),
         durationMinutes: 30,
-        createdAt: new Date().toISOString(),
-        status: 'confirmed'
-      };
+      });
 
-      // Save to localStorage (in real app, this would be a database)
-      const existingBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-      existingBookings.push(booking);
-      localStorage.setItem('bookings', JSON.stringify(existingBookings));
+      if (!booking) {
+        throw new Error('Failed to create booking');
+      }
 
       // Send confirmation email
       await sendConfirmationEmail(booking);
+
+      // Reload bookings to update available slots
+      const updatedBookings = await getAllConfirmedBookings();
+      setExistingBookings(updatedBookings);
 
       setConfirmedBooking(booking);
       setShowSuccess(true);
@@ -653,7 +667,7 @@ const Book = () => {
                   <input
                     type="checkbox"
                     checked={gdprConsent}
-                    onChange={(e) => setGdprConsent(e.target.checked)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGdprConsent(e.target.checked)}
                     className="mt-1 w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
