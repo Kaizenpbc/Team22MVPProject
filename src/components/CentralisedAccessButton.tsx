@@ -53,20 +53,11 @@ const CentralisedAccessButton: React.FC = () => {
             disabled: false,
             variant: 'success'
           });
-        } else if (accessStatus?.demo_completed) {
-          // User completed demo but no subscription
-          setButtonState({
-            text: 'Subscribe for Access',
-            destination: '/pricing',
-            isExternal: false,
-            disabled: false,
-            variant: 'primary'
-          });
         } else {
-          // User needs to book demo
+          // User doesn't have subscription - show pricing (REMOVED demo gate!)
           setButtonState({
-            text: 'Get Centralised Access',
-            destination: '/book',
+            text: 'Get Started',
+            destination: '/pricing',
             isExternal: false,
             disabled: false,
             variant: 'primary'

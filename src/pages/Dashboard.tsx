@@ -147,23 +147,21 @@ const Dashboard: React.FC = () => {
             </p>
           </div>
 
-          {/* Demo Status */}
+          {/* Quick Stats */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
             <div className="flex items-center gap-4 mb-4">
-              <div className={`p-3 rounded-lg ${accessStatus?.demo_completed ? 'bg-purple-100 dark:bg-purple-900' : 'bg-gray-100 dark:bg-gray-700'}`}>
-                <Users className={`w-6 h-6 ${accessStatus?.demo_completed ? 'text-purple-600 dark:text-purple-400' : 'text-gray-600 dark:text-gray-400'}`} />
+              <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900">
+                <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Demo Status
+                Quick Stats
               </h3>
             </div>
-            <p className={`text-lg font-medium mb-2 ${
-              accessStatus?.demo_completed ? 'text-purple-600 dark:text-purple-400' : 'text-gray-600 dark:text-gray-400'
-            }`}>
-              {accessStatus?.demo_completed ? 'Completed' : 'Pending'}
+            <p className="text-lg font-medium mb-2 text-purple-600 dark:text-purple-400">
+              {accessStatus?.demo_completed ? 'Demo Completed' : 'Ready to Start'}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {accessStatus?.demo_completed ? 'Demo Attended' : 'Book Demo'}
+              {accessStatus?.demo_completed ? 'Thanks for attending!' : 'No demo required to subscribe'}
             </p>
           </div>
         </div>
@@ -177,7 +175,7 @@ const Dashboard: React.FC = () => {
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
               {hasActiveSubscription 
                 ? 'You have full access to the workflow optimization platform. Click below to launch your SOP management system.'
-                : 'Complete your demo or subscribe to a plan to access the full workflow optimization platform.'
+                : 'Subscribe to a plan to access the full workflow optimization platform. Need help? Book a demo anytime!'
               }
             </p>
 
@@ -191,23 +189,20 @@ const Dashboard: React.FC = () => {
               </button>
             ) : (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                {!accessStatus?.demo_completed ? (
-                  <Link
-                    to="/book"
-                    className="group inline-flex px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all duration-300 items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg"
-                  >
-                    Book Demo
-                    <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                ) : (
-                  <Link
-                    to="/pricing"
-                    className="group inline-flex px-8 py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-semibold rounded-lg transition-all duration-300 items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg"
-                  >
-                    Subscribe Now
-                    <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                )}
+                <Link
+                  to="/pricing"
+                  className="group inline-flex px-8 py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-semibold rounded-lg transition-all duration-300 items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg"
+                >
+                  View Plans & Subscribe
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  to="/book"
+                  className="group inline-flex px-8 py-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-all duration-300 items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg"
+                >
+                  Book Demo (Optional)
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </div>
             )}
           </div>
