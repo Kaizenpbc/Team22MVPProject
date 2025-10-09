@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserAccessStatus, trackUserJourney, hasActiveSubscription } from '../services/subscriptionService';
+import { getSession } from '../services/authService';
 
 interface ButtonState {
   text: string;
@@ -46,7 +47,13 @@ const CentralisedAccessButton: React.FC = () => {
           const userEmail = user.email || '';
           const tier = accessStatus?.subscription_tier || 'free';
           const workflowLimit = accessStatus?.workflow_limit || 3;
-          const sopUrlWithParams = `https://outskills-project.netlify.app/final-beautiful.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=${tier}&workflow_limit=${workflowLimit}`;
+          const timestamp = Date.now();
+          
+          // Get the current session token to pass to SOP platform
+          const session = await getSession();
+          const accessToken = session.session?.access_token || '';
+          
+          const sopUrlWithParams = `https://outskills-project.netlify.app/sop-platform.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=${tier}&workflow_limit=${workflowLimit}&token=${encodeURIComponent(accessToken)}&t=${timestamp}`;
           
           setButtonState({
             text: 'Access SOP Platform',
@@ -60,7 +67,12 @@ const CentralisedAccessButton: React.FC = () => {
           const userName = user.user_metadata?.full_name || user.email || 'User';
           const userEmail = user.email || '';
           const timestamp = Date.now();
-          const sopUrlWithParams = `https://outskills-project.netlify.app/sop-platform.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=free&workflow_limit=3&t=${timestamp}`;
+          
+          // Get the current session token to pass to SOP platform
+          const session = await getSession();
+          const accessToken = session.session?.access_token || '';
+          
+          const sopUrlWithParams = `https://outskills-project.netlify.app/sop-platform.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=free&workflow_limit=3&token=${encodeURIComponent(accessToken)}&t=${timestamp}`;
           
           setButtonState({
             text: 'Access SOP Platform (Test)',
