@@ -46,7 +46,7 @@ const CentralisedAccessButton: React.FC = () => {
           const userEmail = user.email || '';
           const tier = accessStatus?.subscription_tier || 'free';
           const workflowLimit = accessStatus?.workflow_limit || 3;
-          const sopUrlWithParams = `https://outskills-project.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=${tier}&workflow_limit=${workflowLimit}`;
+          const sopUrlWithParams = `https://outskills-project.netlify.app/final-beautiful.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=${tier}&workflow_limit=${workflowLimit}`;
           
           setButtonState({
             text: 'Access SOP Platform',
