@@ -72,7 +72,7 @@ const CentralisedAccessButton: React.FC = () => {
           const session = await getSession();
           const accessToken = session.session?.access_token || '';
           
-          const sopUrlWithParams = `https://outskills-project.netlify.app/sop-platform.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=free&workflow_limit=3&token=${encodeURIComponent(accessToken)}&t=${timestamp}`;
+          const sopUrlWithParams = `https://outskills-project.netlify.app/sop-platform.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=free&workflow_limit=3&token=${encodeURIComponent(accessToken)}&t=${timestamp}&v=${Math.random()}`;
           
           setButtonState({
             text: 'Access SOP Platform (Test)',
