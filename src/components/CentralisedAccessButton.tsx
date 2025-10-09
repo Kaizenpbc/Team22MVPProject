@@ -59,7 +59,8 @@ const CentralisedAccessButton: React.FC = () => {
           // TEMPORARY: For testing, always show SOP access
           const userName = user.user_metadata?.full_name || user.email || 'User';
           const userEmail = user.email || '';
-          const sopUrlWithParams = `https://outskills-project.netlify.app/final-beautiful.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=free&workflow_limit=3`;
+          const timestamp = Date.now();
+          const sopUrlWithParams = `https://outskills-project.netlify.app/final-beautiful.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=free&workflow_limit=3&t=${timestamp}`;
           
           setButtonState({
             text: 'Access SOP Platform (Test)',
