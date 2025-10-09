@@ -44,7 +44,7 @@ const CentralisedAccessButton: React.FC = () => {
           // User has active subscription - direct SOP access
           setButtonState({
             text: 'Access SOP Platform',
-            destination: 'https://outskills-project.netlify.app/',
+            destination: 'https://outskills-mini-sop.netlify.app/',
             isExternal: true,
             disabled: false,
             variant: 'success'
@@ -101,13 +101,12 @@ const CentralisedAccessButton: React.FC = () => {
     });
 
     // If accessing SOP platform, add user info to URL
-        if (buttonState.isExternal && buttonState.destination.includes('outskills-project.netlify.app')) {
+        if (buttonState.isExternal && buttonState.destination.includes('outskills-mini-sop.netlify.app')) {
           e.preventDefault(); // Prevent default navigation
           const userName = user.user_metadata?.full_name || user.email || 'User';
           const userEmail = user.email || '';
-          // Go directly to the SOP platform with timestamp to bypass cache
-          const timestamp = Date.now();
-          const urlWithParams = `https://outskills-project.netlify.app/final-beautiful.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&direct=true&t=${timestamp}`;
+          // Go directly to the SOP platform with user params
+          const urlWithParams = `https://outskills-mini-sop.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
           console.log('Opening SOP with params:', urlWithParams);
           window.open(urlWithParams, '_blank');
     } else {

@@ -54,7 +54,7 @@ const Dashboard: React.FC = () => {
     }));
 
     // Redirect to SOP platform with user info
-    const sopUrl = `https://outskills-project.netlify.app/final-beautiful.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&token=${ssoToken}`;
+    const sopUrl = `https://outskills-mini-sop.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
     window.open(sopUrl, '_blank');
   };
 
