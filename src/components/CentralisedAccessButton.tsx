@@ -56,13 +56,17 @@ const CentralisedAccessButton: React.FC = () => {
             variant: 'success'
           });
         } else {
-          // User doesn't have subscription - show pricing (REMOVED demo gate!)
+          // TEMPORARY: For testing, always show SOP access
+          const userName = user.user_metadata?.full_name || user.email || 'User';
+          const userEmail = user.email || '';
+          const sopUrlWithParams = `https://outskills-project.netlify.app/final-beautiful.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=free&workflow_limit=3`;
+          
           setButtonState({
-            text: 'Get Started',
-            destination: '/pricing',
-            isExternal: false,
+            text: 'Access SOP Platform (Test)',
+            destination: sopUrlWithParams,
+            isExternal: true,
             disabled: false,
-            variant: 'primary'
+            variant: 'success'
           });
         }
       } catch (error) {
