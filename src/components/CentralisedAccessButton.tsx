@@ -41,10 +41,14 @@ const CentralisedAccessButton: React.FC = () => {
         const accessStatus = await getUserAccessStatus(user.id);
         
         if (hasActiveSubscription(accessStatus)) {
-          // User has active subscription - direct SOP access
+          // User has active subscription - direct SOP access with user info
+          const userName = user.user_metadata?.full_name || user.email || 'User';
+          const userEmail = user.email || '';
+          const sopUrlWithParams = `https://outskills-project.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
+          
           setButtonState({
             text: 'Access SOP Platform',
-            destination: 'https://outskills-mini-sop.netlify.app/',
+            destination: sopUrlWithParams,
             isExternal: true,
             disabled: false,
             variant: 'success'
@@ -100,15 +104,11 @@ const CentralisedAccessButton: React.FC = () => {
       user_status: user ? 'authenticated' : 'anonymous'
     });
 
-    // If accessing SOP platform, add user info to URL
-        if (buttonState.isExternal && buttonState.destination.includes('outskills-mini-sop.netlify.app')) {
-          e.preventDefault(); // Prevent default navigation
-          const userName = user.user_metadata?.full_name || user.email || 'User';
-          const userEmail = user.email || '';
-          // Go directly to the SOP platform with user params
-          const urlWithParams = `https://outskills-mini-sop.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
-          console.log('Opening SOP with params:', urlWithParams);
-          window.open(urlWithParams, '_blank');
+    // If accessing SOP platform, open in new tab
+    if (buttonState.isExternal && buttonState.destination.includes('outskills-project.netlify.app')) {
+      e.preventDefault(); // Prevent default navigation
+      console.log('Opening SOP with params:', buttonState.destination);
+      window.open(buttonState.destination, '_blank');
     } else {
       console.log('Not an external SOP link:', { isExternal: buttonState.isExternal, destination: buttonState.destination });
     }

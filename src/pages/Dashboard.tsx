@@ -44,17 +44,8 @@ const Dashboard: React.FC = () => {
     const userName = user.user_metadata?.full_name || user.email || 'User';
     const userEmail = user.email || '';
 
-    // Generate SSO token
-    const ssoToken = btoa(JSON.stringify({
-      userId: user.id,
-      email: user.email,
-      name: userName,
-      subscriptionTier: accessStatus?.subscription_tier,
-      timestamp: Date.now()
-    }));
-
     // Redirect to SOP platform with user info
-    const sopUrl = `https://outskills-mini-sop.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
+    const sopUrl = `https://outskills-project.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
     window.open(sopUrl, '_blank');
   };
 
