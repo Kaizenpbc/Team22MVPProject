@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ExternalLink, CheckCircle, Clock, Users, Zap } from 'lucide-react';
+import { ArrowRight, ExternalLink, CheckCircle, Clock, Users, Zap, Star } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserAccessStatus, trackUserJourney } from '../services/subscriptionService';
+import { getUserAccessStatus, trackUserJourney, isFreeTier } from '../services/subscriptionService';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -43,9 +43,11 @@ const Dashboard: React.FC = () => {
     // Get user info
     const userName = user.user_metadata?.full_name || user.email || 'User';
     const userEmail = user.email || '';
+    const tier = accessStatus?.subscription_tier || 'free';
+    const workflowLimit = accessStatus?.workflow_limit || 3;
 
-    // Redirect to SOP platform with user info
-    const sopUrl = `https://outskills-project.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
+    // Redirect to SOP platform with user info AND tier info
+    const sopUrl = `https://outskills-project.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=${tier}&workflow_limit=${workflowLimit}`;
     window.open(sopUrl, '_blank');
   };
 
@@ -82,10 +84,34 @@ const Dashboard: React.FC = () => {
   }
 
   const hasActiveSubscription = accessStatus?.subscription_status === 'active' && accessStatus?.sop_access;
+  const isFree = isFreeTier(accessStatus);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 pt-20">
       <div className="max-w-7xl mx-auto px-6 py-16">
+        {/* Free Tier Upgrade Banner */}
+        {isFree && (
+          <div className="mb-8 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-900 border-2 border-yellow-300 dark:border-yellow-700 rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center gap-4">
+              <Star className="w-8 h-8 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                  You're on the Free Plan (3 workflows)
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Upgrade to unlock unlimited workflows, advanced features, and team collaboration!
+                </p>
+              </div>
+              <Link
+                to="/pricing"
+                className="px-6 py-3 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 whitespace-nowrap"
+              >
+                Upgrade Now
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
@@ -94,7 +120,7 @@ const Dashboard: React.FC = () => {
             </span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400">
-            Manage your workflow optimization platform access
+            {isFree ? 'Start with 3 free workflows!' : 'Manage your workflow optimization platform access'}
           </p>
         </div>
 
@@ -118,7 +144,7 @@ const Dashboard: React.FC = () => {
               hasActiveSubscription ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'
             }`}>
               {accessStatus?.subscription_tier ? 
-                `${accessStatus.subscription_tier.charAt(0).toUpperCase() + accessStatus.subscription_tier.slice(1)} Plan` : 
+                `${accessStatus.subscription_tier.charAt(0).toUpperCase() + accessStatus.subscription_tier.slice(1)} ${isFree ? '(Free)' : 'Plan'}` : 
                 'No Active Plan'
               }
             </p>

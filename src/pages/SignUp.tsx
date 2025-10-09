@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, User, Mail, Lock, Building } from 'lucide-react';
 import { signUp } from '../services/authService';
+import { createFreeTierProfile } from '../services/subscriptionService';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -93,10 +94,15 @@ const SignUp = () => {
     }
 
     if (data) {
+      // Auto-grant free tier access
+      if (data.user) {
+        await createFreeTierProfile(data.user.id);
+      }
+
       if (data.user && !data.user.email_confirmed_at) {
-        setSuccessMessage('Account created! Please check your email and click the confirmation link, then come back to sign in.');
+        setSuccessMessage('🎉 Welcome! Your free account is ready. Please check your email to confirm and start using the platform!');
       } else {
-        setSuccessMessage('Account created successfully! You can now sign in.');
+        setSuccessMessage('🎉 Welcome! Your free account is ready with 3 workflows. You can now sign in!');
         setTimeout(() => {
           navigate('/signin');
         }, 2000);

@@ -21,6 +21,21 @@ const Pricing: React.FC = () => {
 
   const pricingTiers: PricingTier[] = [
     {
+      name: 'Free',
+      price: 0,
+      period: 'forever',
+      description: 'Perfect for individuals exploring workflow optimization',
+      icon: <Star className="w-6 h-6" />,
+      color: 'from-gray-400 to-gray-500',
+      features: [
+        '3 Workflows',
+        'Basic Templates',
+        '1 User',
+        'Community Support',
+        'Core Features'
+      ]
+    },
+    {
       name: 'Starter',
       price: 500,
       period: 'month',
@@ -28,12 +43,12 @@ const Pricing: React.FC = () => {
       icon: <Zap className="w-6 h-6" />,
       color: 'from-blue-500 to-blue-600',
       features: [
+        '50 Workflows',
         'Basic SOP Management',
         'Workflow Templates',
         'Team Collaboration (up to 5 users)',
         'Email Support',
-        'Basic Analytics',
-        'Standard Workflows'
+        'Basic Analytics'
       ]
     },
     {
@@ -45,14 +60,14 @@ const Pricing: React.FC = () => {
       color: 'from-purple-500 to-purple-600',
       popular: true,
       features: [
+        'Unlimited Workflows',
         'Advanced SOP Management',
         'Workflow Automation',
         'Team Collaboration (up to 25 users)',
         'Priority Support',
         'Advanced Analytics',
         'Custom Workflows',
-        'API Access',
-        'Integration Hub'
+        'API Access'
       ]
     },
     {
@@ -63,9 +78,9 @@ const Pricing: React.FC = () => {
       icon: <Building className="w-6 h-6" />,
       color: 'from-orange-500 to-orange-600',
       features: [
-        'All Professional Features',
+        'Everything in Professional',
+        'Unlimited Workflows',
         'Unlimited Users',
-        'Custom Workflows',
         'White-label Solution',
         'Dedicated Support',
         'Advanced Security',
@@ -76,6 +91,17 @@ const Pricing: React.FC = () => {
   ];
 
   const handleSubscribe = async (tier: string) => {
+    // Free tier - just sign up!
+    if (tier === 'free') {
+      if (!user) {
+        window.location.href = '/signup';
+      } else {
+        window.location.href = '/dashboard';
+      }
+      return;
+    }
+
+    // Paid tiers
     if (!user) {
       // Redirect to signup if not authenticated
       window.location.href = '/signup';
@@ -138,8 +164,8 @@ const Pricing: React.FC = () => {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {pricingTiers.map((tier, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+          {pricingTiers.map((tier) => (
             <div
               key={tier.name}
               className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-2 ${
@@ -204,6 +230,11 @@ const Pricing: React.FC = () => {
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Processing...
+                    </>
+                  ) : tier.name === 'Free' ? (
+                    <>
+                      {user ? 'Current Plan' : 'Start Free'}
+                      <ArrowRight className="w-5 h-5" />
                     </>
                   ) : (
                     <>

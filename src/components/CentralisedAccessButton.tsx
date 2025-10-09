@@ -41,10 +41,12 @@ const CentralisedAccessButton: React.FC = () => {
         const accessStatus = await getUserAccessStatus(user.id);
         
         if (hasActiveSubscription(accessStatus)) {
-          // User has active subscription - direct SOP access with user info
+          // User has active subscription - direct SOP access with user info AND tier
           const userName = user.user_metadata?.full_name || user.email || 'User';
           const userEmail = user.email || '';
-          const sopUrlWithParams = `https://outskills-project.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}`;
+          const tier = accessStatus?.subscription_tier || 'free';
+          const workflowLimit = accessStatus?.workflow_limit || 3;
+          const sopUrlWithParams = `https://outskills-project.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=${tier}&workflow_limit=${workflowLimit}`;
           
           setButtonState({
             text: 'Access SOP Platform',

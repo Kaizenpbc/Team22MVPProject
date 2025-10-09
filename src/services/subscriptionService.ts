@@ -6,10 +6,12 @@ import { supabase } from '../lib/supabase';
 export interface UserAccessStatus {
   user_id: string;
   subscription_status: 'none' | 'trial' | 'active' | 'cancelled' | 'expired';
-  subscription_tier: 'starter' | 'professional' | 'enterprise' | null;
+  subscription_tier: 'free' | 'starter' | 'professional' | 'enterprise' | null;
   sop_access: boolean;
   demo_completed: boolean;
   subscription_expires_at: string | null;
+  workflow_limit?: number;
+  user_limit?: number;
 }
 
 export interface UserJourney {
@@ -30,28 +32,52 @@ export const getUserAccessStatus = async (userId: string): Promise<UserAccessSta
     });
 
     if (error) {
-      // If RPC doesn't exist, return default values
-      console.warn('RPC function not available, using defaults:', error);
+      // If RPC doesn't exist, try to get from user_profiles directly
+      console.warn('RPC function not available, querying user_profiles:', error);
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (profileError || !profileData) {
+        // Return free tier defaults for new users
+        return {
+          user_id: userId,
+          subscription_status: 'active',
+          subscription_tier: 'free',
+          sop_access: true,
+          demo_completed: false,
+          subscription_expires_at: null,
+          workflow_limit: 3,
+          user_limit: 1
+        };
+      }
+
       return {
-        user_id: userId,
-        subscription_status: 'none',
-        subscription_tier: null,
-        sop_access: false,
-        demo_completed: false,
-        subscription_expires_at: null
+        user_id: profileData.id,
+        subscription_status: profileData.subscription_status || 'active',
+        subscription_tier: profileData.subscription_tier || 'free',
+        sop_access: profileData.sop_access !== false, // Default to true
+        demo_completed: profileData.demo_completed || false,
+        subscription_expires_at: profileData.subscription_expires_at,
+        workflow_limit: profileData.workflow_limit || 3,
+        user_limit: profileData.user_limit || 1
       };
     }
     return data?.[0] || null;
   } catch (error: any) {
     console.error('Error getting user access status:', error);
-    // Return default values on error
+    // Return free tier defaults on error
     return {
       user_id: userId,
-      subscription_status: 'none',
-      subscription_tier: null,
-      sop_access: false,
+      subscription_status: 'active',
+      subscription_tier: 'free',
+      sop_access: true,
       demo_completed: false,
-      subscription_expires_at: null
+      subscription_expires_at: null,
+      workflow_limit: 3,
+      user_limit: 1
     };
   }
 };
@@ -193,23 +219,103 @@ export const getUserJourney = async (userId: string): Promise<UserJourney[]> => 
   }
 };
 
-// Check if user has active subscription
+// Check if user has active subscription (including free tier!)
 export const hasActiveSubscription = (accessStatus: UserAccessStatus | null): boolean => {
   if (!accessStatus) return false;
   
+  // Free tier users have access too!
   return accessStatus.subscription_status === 'active' && 
          accessStatus.sop_access === true &&
          (accessStatus.subscription_expires_at === null || 
           new Date(accessStatus.subscription_expires_at) > new Date());
 };
 
+// Check if user is on free tier
+export const isFreeTier = (accessStatus: UserAccessStatus | null): boolean => {
+  return accessStatus?.subscription_tier === 'free';
+};
+
+// Check if user is on paid tier
+export const isPaidTier = (accessStatus: UserAccessStatus | null): boolean => {
+  return accessStatus?.subscription_tier !== 'free' && accessStatus?.subscription_tier !== null;
+};
+
 // Get subscription tier features
 export const getSubscriptionFeatures = (tier: string): string[] => {
   const features = {
-    starter: ['basic_sop', 'workflow_templates', 'team_collaboration'],
-    professional: ['advanced_sop', 'workflow_automation', 'analytics', 'api_access'],
-    enterprise: ['all_features', 'custom_workflows', 'priority_support', 'white_label']
+    free: ['3_workflows', 'basic_templates', '1_user', 'community_support'],
+    starter: ['50_workflows', 'basic_sop', 'workflow_templates', '5_users', 'email_support'],
+    professional: ['unlimited_workflows', 'advanced_sop', 'workflow_automation', '25_users', 'analytics', 'api_access', 'priority_support'],
+    enterprise: ['unlimited_workflows', 'all_features', 'custom_workflows', 'unlimited_users', 'dedicated_support', 'white_label', 'sla']
   };
   
   return features[tier as keyof typeof features] || [];
+};
+
+// Get workflow limits by tier
+export const getWorkflowLimit = (tier: string | null): number => {
+  const limits = {
+    free: 3,
+    starter: 50,
+    professional: -1, // unlimited
+    enterprise: -1  // unlimited
+  };
+  
+  return limits[tier as keyof typeof limits] || 3;
+};
+
+// Get user limits by tier
+export const getUserLimit = (tier: string | null): number => {
+  const limits = {
+    free: 1,
+    starter: 5,
+    professional: 25,
+    enterprise: -1  // unlimited
+  };
+  
+  return limits[tier as keyof typeof limits] || 1;
+};
+
+// Auto-create free tier profile for new users
+export const createFreeTierProfile = async (userId: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('user_profiles')
+      .insert({
+        id: userId,
+        subscription_status: 'active',
+        subscription_tier: 'free',
+        sop_access: true,
+        demo_completed: false,
+        workflow_limit: 3,
+        user_limit: 1
+      });
+
+    if (error) {
+      // Profile might already exist, try to update instead
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update({
+          subscription_status: 'active',
+          subscription_tier: 'free',
+          sop_access: true,
+          workflow_limit: 3,
+          user_limit: 1
+        })
+        .eq('id', userId);
+
+      if (updateError) throw updateError;
+    }
+
+    // Track the event
+    await trackUserJourney(userId, 'free_tier_granted', 'opscentral', {
+      tier: 'free',
+      granted_at: new Date().toISOString()
+    });
+
+    return true;
+  } catch (error: any) {
+    console.error('Error creating free tier profile:', error);
+    return false;
+  }
 };
