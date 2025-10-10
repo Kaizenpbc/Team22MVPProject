@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Zap } from 'lucide-react';
+import WorkflowVisualization from './WorkflowVisualization';
 
 const Hero = () => {
   return (
@@ -50,10 +51,13 @@ const Hero = () => {
             to="/book"
             className="group inline-flex px-6 sm:px-8 py-3 sm:py-4 bg-accent-600 hover:bg-accent-700 text-white font-semibold rounded-lg transition-all duration-300 items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 min-h-[44px] text-base sm:text-lg"
           >
-            Experience OpsCentral Today
+            Book Your Demo Today
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
+
+        {/* Beautiful Workflow Visualization */}
+        <WorkflowVisualization />
       </div>
     </section>
   );
