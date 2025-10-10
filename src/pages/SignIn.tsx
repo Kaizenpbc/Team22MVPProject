@@ -77,8 +77,8 @@ const SignIn = () => {
     }
 
     if (data) {
-      // Redirect to home page on successful login
-      navigate('/');
+      // Redirect to dashboard on successful login
+      navigate('/dashboard');
     }
   };
 
