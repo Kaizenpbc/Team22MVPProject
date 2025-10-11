@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, ExternalLink, CheckCircle, Clock, Users, Zap, Star } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserAccessStatus, trackUserJourney, isFreeTier } from '../services/subscriptionService';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [accessStatus, setAccessStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,10 +46,13 @@ const Dashboard: React.FC = () => {
     const userEmail = user.email || '';
     const tier = accessStatus?.subscription_tier || 'free';
     const workflowLimit = accessStatus?.workflow_limit || 3;
+    
+    // Generate a simple token for Team22 authentication
+    const team22Token = btoa(`${userName}:${userEmail}:${Date.now()}`);
 
-    // Redirect to SOP platform with user info AND tier info
-    const sopUrl = `https://outskills-project.netlify.app/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=${tier}&workflow_limit=${workflowLimit}`;
-    window.open(sopUrl, '_blank');
+    // Redirect directly to RegularUserInterface with user already authenticated
+    const sopUrl = `https://outskills-project.netlify.app/?token=${encodeURIComponent(team22Token)}&name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=${tier}&workflow_limit=${workflowLimit}&interface=user`;
+    window.location.href = sopUrl;
   };
 
   if (loading) {

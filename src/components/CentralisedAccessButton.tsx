@@ -53,7 +53,9 @@ const CentralisedAccessButton: React.FC = () => {
           const session = await getSession();
           const accessToken = session.session?.access_token || '';
           
-          const sopUrlWithParams = `https://outskills-project.netlify.app/sop-platform.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=${tier}&workflow_limit=${workflowLimit}&token=${encodeURIComponent(accessToken)}&t=${timestamp}`;
+          // LOCAL TESTING: Use localhost:5174 for development, Netlify for production
+          const sopBaseUrl = import.meta.env.DEV ? 'http://localhost:5176' : 'https://outskills-project.netlify.app';
+          const sopUrlWithParams = `${sopBaseUrl}/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=${tier}&workflow_limit=${workflowLimit}&token=${encodeURIComponent(accessToken)}&interface=user&t=${timestamp}`;
           
           setButtonState({
             text: 'Access SOP Platform',
@@ -72,7 +74,9 @@ const CentralisedAccessButton: React.FC = () => {
           const session = await getSession();
           const accessToken = session.session?.access_token || '';
           
-          const sopUrlWithParams = `https://outskills-project.netlify.app/sop-platform.html?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=free&workflow_limit=3&token=${encodeURIComponent(accessToken)}&t=${timestamp}&v=${Math.random()}`;
+          // LOCAL TESTING: Use localhost:5174 for development, Netlify for production
+          const sopBaseUrl = import.meta.env.DEV ? 'http://localhost:5176' : 'https://outskills-project.netlify.app';
+          const sopUrlWithParams = `${sopBaseUrl}/?name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=free&workflow_limit=3&token=${encodeURIComponent(accessToken)}&interface=user&t=${timestamp}&v=${Math.random()}&cache=${Date.now()}`;
           
           setButtonState({
             text: 'Access SOP Platform (Test)',
@@ -114,8 +118,8 @@ const CentralisedAccessButton: React.FC = () => {
       user_status: user ? 'authenticated' : 'anonymous'
     });
 
-    // If accessing SOP platform, open in new tab
-    if (buttonState.isExternal && buttonState.destination.includes('outskills-project.netlify.app')) {
+    // If accessing SOP platform (Netlify or localhost), open in new tab
+    if (buttonState.isExternal && (buttonState.destination.includes('outskills-project.netlify.app') || buttonState.destination.includes('localhost:5176'))) {
       e.preventDefault(); // Prevent default navigation
       console.log('Opening SOP with params:', buttonState.destination);
       window.open(buttonState.destination, '_blank');

@@ -1,22 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Workflow, Mail, Phone, MapPin, Twitter, Linkedin, Github, Instagram, Facebook, ArrowRight } from 'lucide-react';
-import CentralisedAccessButton from './CentralisedAccessButton';
 
 const Footer = () => {
   return (
     <footer className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white">
       <div className="max-w-7xl mx-auto px-6 py-16">
-        {/* CTA Section */}
-        <div className="text-center mb-16 pb-16 border-b border-gray-300 dark:border-gray-700">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-            Transform Your Workflow Today
-          </h2>
-          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-            Are you ready to revolutionise how your team handles workflows and SOPs?
-          </p>
-          <CentralisedAccessButton />
-        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
