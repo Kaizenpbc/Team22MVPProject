@@ -295,8 +295,8 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
     return edges;
   }, [steps]);
 
-  const [nodes] = useNodesState(buildNodes);
-  const [edges] = useEdgesState(buildEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(buildNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(buildEdges);
 
   return (
     <div style={{ width: '100%', height: '800px', backgroundColor: '#fafafa', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
@@ -317,19 +317,28 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
         <div style={{ marginBottom: 5 }}>🟡 Medium Risk</div>
         <div style={{ marginBottom: 5 }}>🔴 High Risk</div>
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #e0e0e0' }}>
-          <div style={{ marginBottom: 5 }}>Drag nodes to reposition</div>
-          <div>Zoom with mouse wheel</div>
+          <div style={{ marginBottom: 5 }}>✋ Drag nodes to reposition</div>
+          <div style={{ marginBottom: 5 }}>🔍 Zoom with mouse wheel</div>
+          <div>🖱️ Pan by dragging background</div>
         </div>
       </div>
 
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodesDraggable={true}
+        nodesConnectable={false}
+        elementsSelectable={true}
         fitView
+        fitViewOptions={{ padding: 0.2 }}
+        minZoom={0.5}
+        maxZoom={2}
         attributionPosition="bottom-left"
       >
         <Background color="#e0e0e0" gap={16} />
-        <Controls />
+        <Controls showInteractive={true} />
       </ReactFlow>
     </div>
   );
