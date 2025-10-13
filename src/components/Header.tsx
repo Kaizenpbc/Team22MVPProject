@@ -22,7 +22,7 @@ const Header = () => {
               <Workflow className="w-6 h-6 text-white" />
             </div>
             <Link to="/" className="text-xl font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
-              OpsCentral
+              Kovari
             </Link>
           </div>
           

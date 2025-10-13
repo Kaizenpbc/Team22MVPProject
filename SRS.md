@@ -1,5 +1,5 @@
 # Software Requirements Specification (SRS)
-## OpsCentral - Product Management Demo Booking System
+## Kovari - Product Management Demo Booking System
 
 **Version**: 1.0  
 **Date**: January 2025  
@@ -20,10 +20,10 @@
 ## 1. Introduction
 
 ### 1.1 Purpose
-This Software Requirements Specification (SRS) document describes the functional and non-functional requirements for OpsCentral, a web-based application designed to streamline the booking process for product management demo appointments.
+This Software Requirements Specification (SRS) document describes the functional and non-functional requirements for Kovari, a web-based application designed to streamline the booking process for product management demo appointments.
 
 ### 1.2 Scope
-OpsCentral serves as a customer-facing booking platform that allows potential clients to schedule product management demos while collecting valuable information about their workflow challenges and requirements.
+Kovari serves as a customer-facing booking platform that allows potential clients to schedule product management demos while collecting valuable information about their workflow challenges and requirements.
 
 ### 1.3 Definitions, Acronyms, and Abbreviations
 - **SRS**: Software Requirements Specification
@@ -47,7 +47,7 @@ This document is organized into sections covering system overview, functional re
 ## 2. Overall Description
 
 ### 2.1 Product Perspective
-OpsCentral is a standalone web application that integrates with Supabase for backend services including authentication, database management, and real-time functionality.
+Kovari is a standalone web application that integrates with Supabase for backend services including authentication, database management, and real-time functionality.
 
 ### 2.2 Product Functions
 The system provides the following main functions:

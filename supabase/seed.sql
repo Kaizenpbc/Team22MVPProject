@@ -19,7 +19,7 @@ INSERT INTO public.bookings (
   (
     'John Smith',
     'john@example.com',
-    'Looking forward to seeing how OpsCentral can help our team',
+    'Looking forward to seeing how Kovari can help our team',
     'We struggle with keeping SOPs up to date',
     'Currently using Google Docs and Notion',
     'Centralize all our process documentation',

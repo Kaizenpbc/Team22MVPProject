@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import AssistantLauncher from './components/AssistantLauncher';
@@ -9,6 +9,7 @@ import About from './pages/About';
 import Book from './pages/Book';
 import Pricing from './pages/Pricing';
 import Dashboard from './pages/Dashboard';
+import WorkflowCreator from './pages/WorkflowCreator';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Cookies from './pages/Cookies';
@@ -20,7 +21,6 @@ function App() {
   useEffect(() => {
     // Check for saved theme preference or default to dark
     const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
     if (savedTheme === 'dark' || !savedTheme) {
       document.documentElement.classList.add('dark');
@@ -50,6 +50,7 @@ function App() {
         <Route path="/book" element={<Book />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/workflow-creator" element={<WorkflowCreator />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/cookies" element={<Cookies />} />

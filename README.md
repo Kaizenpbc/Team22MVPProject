@@ -1,4 +1,4 @@
-# OpsCentral - Streamlined SOP Platform
+# Kovari - Streamlined SOP Platform
 
 A centralised hub that transforms how product managers handle internal workflows, SOP management, and real-time updates.
 

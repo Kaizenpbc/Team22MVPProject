@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, ExternalLink, CheckCircle, Clock, Users, Zap, Star } from 'lucide-react';
+import { ArrowRight, CheckCircle, Clock, Users, Zap, Star } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserAccessStatus, trackUserJourney, isFreeTier } from '../services/subscriptionService';
 
@@ -33,26 +33,16 @@ const Dashboard: React.FC = () => {
     loadUserStatus();
   }, [user]);
 
-  const handleSOPAccess = async () => {
+  const handleWorkflowAccess = async () => {
     if (!user) return;
 
-    // Track SOP access attempt
-    await trackUserJourney(user.id, 'sop_access_attempted', 'opscentral', {
+    // Track workflow access attempt
+    await trackUserJourney(user.id, 'workflow_access_attempted', 'kovari', {
       subscription_tier: accessStatus?.subscription_tier
     });
 
-    // Get user info
-    const userName = user.user_metadata?.full_name || user.email || 'User';
-    const userEmail = user.email || '';
-    const tier = accessStatus?.subscription_tier || 'free';
-    const workflowLimit = accessStatus?.workflow_limit || 3;
-    
-    // Generate a simple token for Team22 authentication
-    const team22Token = btoa(`${userName}:${userEmail}:${Date.now()}`);
-
-    // Redirect directly to RegularUserInterface with user already authenticated
-    const sopUrl = `https://outskills-project.netlify.app/?token=${encodeURIComponent(team22Token)}&name=${encodeURIComponent(userName)}&email=${encodeURIComponent(userEmail)}&tier=${tier}&workflow_limit=${workflowLimit}&interface=user`;
-    window.location.href = sopUrl;
+    // Navigate to integrated workflow creator
+    navigate('/workflow-creator');
   };
 
   if (loading) {
@@ -200,22 +190,22 @@ const Dashboard: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-16">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              {hasActiveSubscription ? 'Access Your SOP Platform' : 'Get Started with SOP'}
+              {hasActiveSubscription ? 'Access Workflow Creator' : 'Get Started with Workflows'}
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
               {hasActiveSubscription 
-                ? 'You have full access to the workflow optimization platform. Click below to launch your SOP management system.'
+                ? 'You have full access to the workflow creator. Click below to create and manage your workflows.'
                 : 'Subscribe to a plan to access the full workflow optimization platform. Need help? Book a demo anytime!'
               }
             </p>
 
             {hasActiveSubscription ? (
               <button
-                onClick={handleSOPAccess}
+                onClick={handleWorkflowAccess}
                 className="group inline-flex px-8 py-4 bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-semibold rounded-lg transition-all duration-300 items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg"
               >
-                Launch SOP Platform
-                <ExternalLink className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                Launch Workflow Creator
+                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </button>
             ) : (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">

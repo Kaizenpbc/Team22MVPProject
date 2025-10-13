@@ -6,8 +6,8 @@ const FAQ = () => {
 
   const faqs = [
     {
-      question: "How does OpsCentral integrate with existing product management tools?",
-      answer: "OpsCentral seamlessly integrates with popular tools like Jira, Trello, Asana, and Slack through our robust API connections. Our platform acts as a centralised hub that pulls data from your existing tools whilst maintaining your current workflows, ensuring a smooth transition without disrupting your team's productivity."
+      question: "How does Kovari integrate with existing product management tools?",
+      answer: "Kovari seamlessly integrates with popular tools like Jira, Trello, Asana, and Slack through our robust API connections. Our platform acts as a centralised hub that pulls data from your existing tools whilst maintaining your current workflows, ensuring a smooth transition without disrupting your team's productivity."
     },
     {
       question: "Can I customise workflows to match my team's specific processes?",
@@ -15,11 +15,11 @@ const FAQ = () => {
     },
     {
       question: "What kind of real-time updates and notifications does the platform provide?",
-      answer: "OpsCentral provides instant notifications for task updates, approval requests, deadline reminders, and process completions. You can customise notification preferences, choose delivery methods (email, in-app, mobile push), and set up smart alerts that only notify relevant team members based on their roles and responsibilities."
+      answer: "Kovari provides instant notifications for task updates, approval requests, deadline reminders, and process completions. You can customise notification preferences, choose delivery methods (email, in-app, mobile push), and set up smart alerts that only notify relevant team members based on their roles and responsibilities."
     },
     {
       question: "Is there a learning curve for new users, and what support is available?",
-      answer: "We've designed OpsCentral to be intuitive for product managers. Most users are productive within their first day. We provide comprehensive onboarding, video tutorials, live training sessions, and 24/7 customer support. Our dedicated customer success team ensures smooth adoption and ongoing optimisation of your workflows."
+      answer: "We've designed Kovari to be intuitive for product managers. Most users are productive within their first day. We provide comprehensive onboarding, video tutorials, live training sessions, and 24/7 customer support. Our dedicated customer success team ensures smooth adoption and ongoing optimisation of your workflows."
     },
     {
       question: "How secure is my data, and what compliance standards do you meet?",
@@ -41,7 +41,7 @@ const FAQ = () => {
           <p className="text-lg text-primary-600 dark:text-primary-300">
           </p>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
-            Get answers to the most common questions about OpsCentral.
+            Get answers to the most common questions about Kovari.
           </p>
         </div>
 

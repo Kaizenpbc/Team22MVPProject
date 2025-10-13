@@ -91,7 +91,7 @@ const SignIn = () => {
               Welcome Back
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Sign in to your OpsCentral account
+              Sign in to your Kovari account
             </p>
           </div>
 

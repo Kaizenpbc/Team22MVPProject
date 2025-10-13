@@ -14,7 +14,7 @@ const Footer = () => {
               <div className="p-2 bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg">
                 <Workflow className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-primary-600 dark:text-primary-400">OpsCentral</span>
+              <span className="text-xl font-bold text-primary-600 dark:text-primary-400">Kovari</span>
             </div>
             <p className="text-sm sm:text-base text-gray-700 dark:text-white mb-6 max-w-md">
               The centralised hub that transforms how product managers handle internal workflows, 
@@ -22,46 +22,46 @@ const Footer = () => {
             </p>
             <div className="flex flex-wrap gap-3 sm:gap-4">
               <a 
-                href="https://twitter.com/OpsCentral" 
+                href="https://twitter.com/Kovari" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                aria-label="OpsCentral Twitter"
+                aria-label="Kovari Twitter"
                 className="p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-all duration-300 border-4 border-primary-600 dark:border-primary-600 hover:scale-110 hover:shadow-lg hover:shadow-primary-500/25 cursor-pointer"
               >
                 <Twitter className="w-5 h-5" />
               </a>
               <a 
-                href="https://linkedin.com/company/OpsCentral" 
+                href="https://linkedin.com/company/Kovari" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                aria-label="OpsCentral LinkedIn"
+                aria-label="Kovari LinkedIn"
                 className="p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-all duration-300 border-4 border-primary-600 dark:border-primary-600 hover:scale-110 hover:shadow-lg hover:shadow-primary-500/25 cursor-pointer"
               >
                 <Linkedin className="w-5 h-5" />
               </a>
               <a 
-                href="https://instagram.com/OpsCentral" 
+                href="https://instagram.com/Kovari" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                aria-label="OpsCentral Instagram"
+                aria-label="Kovari Instagram"
                 className="p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-all duration-300 border-4 border-primary-600 dark:border-primary-600 hover:scale-110 hover:shadow-lg hover:shadow-primary-500/25 cursor-pointer"
               >
                 <Instagram className="w-5 h-5" />
               </a>
               <a 
-                href="https://facebook.com/OpsCentral" 
+                href="https://facebook.com/Kovari" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                aria-label="OpsCentral Facebook"
+                aria-label="Kovari Facebook"
                 className="p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-all duration-300 border-4 border-primary-600 dark:border-primary-600 hover:scale-110 hover:shadow-lg hover:shadow-primary-500/25 cursor-pointer"
               >
                 <Facebook className="w-5 h-5" />
               </a>
               <a 
-                href="https://github.com/OpsCentral" 
+                href="https://github.com/Kovari" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                aria-label="OpsCentral GitHub"
+                aria-label="Kovari GitHub"
                 className="p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-all duration-300 border-4 border-primary-600 dark:border-primary-600 hover:scale-110 hover:shadow-lg hover:shadow-primary-500/25 cursor-pointer"
               >
                 <Github className="w-5 h-5" />
@@ -108,7 +108,7 @@ const Footer = () => {
         <div className="border-t border-gray-300 dark:border-gray-700 pt-8 mt-12">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:pr-0 md:pr-0 lg:pr-28 xl:pr-32">
             <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">
-              © 2025 OpsCentral. All rights reserved.
+              © 2025 Kovari. All rights reserved.
             </p>
             <div className="flex flex-wrap gap-4 sm:gap-6 text-xs sm:text-sm justify-center text-center">
               <Link to="/privacy" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Privacy Policy</Link>

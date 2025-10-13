@@ -248,13 +248,13 @@ const Book = () => {
     const icsContent = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//OpsCentral//Booking//EN',
+      'PRODID:-//Kovari//Booking//EN',
       'BEGIN:VEVENT',
       `UID:${booking.id}@opscentral.com`,
       `DTSTART;TZID=${booking.timezoneSelected}:${formatDate(startDate)}`,
       `DTEND;TZID=${booking.timezoneSelected}:${formatDate(endDate)}`,
-      'SUMMARY:OpsCentral Demo Session',
-      'DESCRIPTION:Your scheduled OpsCentral demo session',
+      'SUMMARY:Kovari Demo Session',
+      'DESCRIPTION:Your scheduled Kovari demo session',
       'LOCATION:Online',
       'STATUS:CONFIRMED',
       'END:VEVENT',
@@ -351,9 +351,9 @@ const Book = () => {
 
     const params = new URLSearchParams({
       action: 'TEMPLATE',
-      text: 'OpsCentral Demo Session',
+      text: 'Kovari Demo Session',
       dates: `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`,
-      details: 'Your scheduled OpsCentral demo session',
+      details: 'Your scheduled Kovari demo session',
       location: 'Online',
       ctz: booking.timezoneSelected
     });
@@ -377,7 +377,7 @@ const Book = () => {
             </h1>
             
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-              Your OpsCentral demo is scheduled for{' '}
+              Your Kovari demo is scheduled for{' '}
               <span className="font-semibold text-gray-900 dark:text-white">
                 {localStartTime.toLocaleDateString('en-GB', { 
                   weekday: 'long', 
@@ -431,10 +431,10 @@ const Book = () => {
             tabIndex={-1}
             className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 focus:outline-none"
           >
-            Book Your OpsCentral Demo
+            Book Your Kovari Demo
           </h1>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
-            Schedule a 30-minute personalized demo to see how OpsCentral can transform your workflows
+            Schedule a 30-minute personalized demo to see how Kovari can transform your workflows
           </p>
         </div>
 
@@ -616,7 +616,7 @@ const Book = () => {
 
                   <div>
                     <label htmlFor="painPoints.mainGoal" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      What's the main goal you'd like to achieve through OpsCentral?
+                      What's the main goal you'd like to achieve through Kovari?
                     </label>
                     <textarea
                       id="painPoints.mainGoal"
@@ -671,7 +671,7 @@ const Book = () => {
                     className="mt-1 w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    I consent to OpsCentral storing my details and contacting me regarding my booking. My information will not be shared or used for any other purpose. *
+                    I consent to Kovari storing my details and contacting me regarding my booking. My information will not be shared or used for any other purpose. *
                   </span>
                 </label>
               </div>

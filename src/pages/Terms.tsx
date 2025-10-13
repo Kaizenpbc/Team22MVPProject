@@ -20,14 +20,14 @@ const Terms = () => {
           </p>
           
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-            These terms and conditions govern your use of the OpsCentral platform and services. By accessing or using our services, you agree to be bound by these terms.
+            These terms and conditions govern your use of the Kovari platform and services. By accessing or using our services, you agree to be bound by these terms.
           </p>
 
           <div className="space-y-8">
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Acceptance of Terms</h2>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                By accessing and using OpsCentral, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+                By accessing and using Kovari, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
               </p>
             </div>
 
@@ -48,7 +48,7 @@ const Terms = () => {
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Intellectual Property Rights</h2>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                The service and its original content, features, and functionality are and will remain the exclusive property of OpsCentral and its licensors. The service is protected by copyright, trademark, and other laws.
+                The service and its original content, features, and functionality are and will remain the exclusive property of Kovari and its licensors. The service is protected by copyright, trademark, and other laws.
               </p>
             </div>
 
@@ -69,7 +69,7 @@ const Terms = () => {
             <div>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Limitation of Liability</h2>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                In no case shall OpsCentral, our directors, officers, employees, affiliates, agents, contractors, interns, suppliers, service providers, or licensors be liable for any injury, loss, claim, or any direct, indirect, incidental, punitive, special, or consequential damages of any kind.
+                In no case shall Kovari, our directors, officers, employees, affiliates, agents, contractors, interns, suppliers, service providers, or licensors be liable for any injury, loss, claim, or any direct, indirect, incidental, punitive, special, or consequential damages of any kind.
               </p>
             </div>
 

@@ -6,7 +6,7 @@ const Testimonials = () => {
 
   const testimonials = [
     {
-      review: "OpsCentral has saved us countless hours by streamlining our processes. What used to take days now happens in hours.",
+      review: "Kovari has saved us countless hours by streamlining our processes. What used to take days now happens in hours.",
       name: "Sarah Mitchell",
       title: "Senior Product Manager",
       company: "TechFlow Solutions",
@@ -59,7 +59,7 @@ const Testimonials = () => {
           <p className="text-lg text-primary-600 dark:text-primary-300">
           </p>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
-            Discover how teams worldwide are transforming their operations with OpsCentral.
+            Discover how teams worldwide are transforming their operations with Kovari.
           </p>
         </div>
 

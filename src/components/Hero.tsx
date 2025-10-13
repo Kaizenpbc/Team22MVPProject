@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Zap } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import WorkflowVisualization from './WorkflowVisualization';
 
 const Hero = () => {
@@ -34,16 +34,15 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-accent-600">
-          OpsCentral
+          Kovari
         </h1>
         
         <p className="text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-4 max-w-4xl mx-auto leading-relaxed">
-          A centralised hub that transforms how product managers handle internal workflows, 
-          SOP management, and real-time updates
+          Workflow Intelligence by Kaizen
         </p>
         
         <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-8 sm:mb-12 max-w-3xl mx-auto">
-          One location - all the information in one place, with access to it at your fingertips.
+          AI-powered workflow intelligence that extracts, structures, and automates processes from any document — creating clarity, efficiency, and compliance across industries.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

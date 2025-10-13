@@ -48,16 +48,16 @@ export const sendBookingConfirmation = async (data: BookingEmailData) => {
     minute: '2-digit'
   });
   
-  const subject = `Your OpsCentral booking is confirmed – ${formattedDate} at ${formattedTime}`;
+  const subject = `Your Kovari booking is confirmed – ${formattedDate} at ${formattedTime}`;
   
   // Create email content
   const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #0d9488;">Your OpsCentral Demo is Confirmed!</h2>
+      <h2 style="color: #0d9488;">Your Kovari Demo is Confirmed!</h2>
       
       <p>Hi ${booking.fullName},</p>
       
-      <p>Thank you for booking a demo with OpsCentral. We're excited to show you how our platform can transform your workflow management.</p>
+      <p>Thank you for booking a demo with Kovari. We're excited to show you how our platform can transform your workflow management.</p>
       
       <div style="background: #f0fdfa; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <h3 style="color: #0d9488; margin-top: 0;">Booking Details</h3>
@@ -90,14 +90,14 @@ export const sendBookingConfirmation = async (data: BookingEmailData) => {
       
       <p>Looking forward to speaking with you!</p>
       
-      <p>Best regards,<br>The OpsCentral Team</p>
+      <p>Best regards,<br>The Kovari Team</p>
     </div>
   `;
 
   // Internal team email content
   const internalEmailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #0d9488;">New OpsCentral Demo Booking</h2>
+      <h2 style="color: #0d9488;">New Kovari Demo Booking</h2>
       
       <div style="background: #f0fdfa; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <h3 style="color: #0d9488; margin-top: 0;">Booking Details</h3>

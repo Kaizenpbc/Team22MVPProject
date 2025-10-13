@@ -6,11 +6,11 @@ const About = () => {
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-            About OpsCentral
+            About Kovari
           </h1>
           
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-            OpsCentral is built for product managers who need a single, dependable hub to align workflows, standardise SOPs, and track updates in real time. Our mission is simple: fewer tabs, fewer handoffs, clearer ownership - so teams can move faster with confidence.
+            Kovari is built for product managers who need a single, dependable hub to align workflows, standardise SOPs, and track updates in real time. Our mission is simple: fewer tabs, fewer handoffs, clearer ownership - so teams can move faster with confidence.
           </p>
 
           <div className="space-y-8">
@@ -22,7 +22,7 @@ const About = () => {
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold text-primary-600 dark:text-primary-400 mb-4">Why OpsCentral</h2>
+              <h2 className="text-xl font-semibold text-primary-600 dark:text-primary-400 mb-4">Why Kovari</h2>
               <div className="space-y-3">
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                   <strong className="text-gray-900 dark:text-white">Save time:</strong> Streamline processes and remove duplication.
@@ -60,10 +60,10 @@ const About = () => {
             <div>
               <h2 className="text-xl font-semibold text-primary-600 dark:text-primary-400 mb-4">Our vision</h2>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
-                OpsCentral brings work back together. We're building a secure, scalable hub where product teams standardise how work gets done - then automate it. The result: faster cycles, fewer errors, and more time for real product thinking.
+                Kovari brings work back together. We're building a secure, scalable hub where product teams standardise how work gets done - then automate it. The result: faster cycles, fewer errors, and more time for real product thinking.
               </p>
               <p className="text-gray-600 dark:text-gray-400 italic">
-                - The OpsCentral Team
+                - The Kovari Team
               </p>
             </div>
           </div>

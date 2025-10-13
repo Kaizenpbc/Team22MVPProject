@@ -39,7 +39,7 @@ Your Supabase backend is **100% complete**! Here's everything that's ready:
 2. Click **"Start your project"**
 3. Sign up with GitHub (easiest) or email
 4. Create a new project:
-   - **Name**: OpsCentral
+   - **Name**: Kovari
    - **Password**: (create a strong one and save it!)
    - **Region**: Choose closest to you
 5. Wait 2-3 minutes for setup
@@ -150,6 +150,7 @@ Your project now has:
 - ✅ Database (PostgreSQL)
 
 Just follow the 7 steps above and you'll be up and running! 🚀
+
 
 
 

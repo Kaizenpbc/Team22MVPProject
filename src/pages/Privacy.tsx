@@ -20,7 +20,7 @@ const Privacy = () => {
           </p>
           
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-            This privacy policy explains how OpsCentral collects, uses, and protects your personal information when you use our platform and services.
+            This privacy policy explains how Kovari collects, uses, and protects your personal information when you use our platform and services.
           </p>
 
           <div className="space-y-8">

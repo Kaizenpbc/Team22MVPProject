@@ -1,6 +1,6 @@
 # 🚀 Quick Start Guide
 
-Get your OpsCentral booking system running with Supabase in 5 minutes!
+Get your Kovari booking system running with Supabase in 5 minutes!
 
 ## Step 1: Install the Supabase Package
 
@@ -15,7 +15,7 @@ This installs all dependencies including `@supabase/supabase-js`.
 1. Go to [supabase.com](https://supabase.com) and create a free account
 2. Click **"New Project"**
 3. Fill in:
-   - Name: `OpsCentral`
+   - Name: `Kovari`
    - Password: (create a strong one!)
    - Region: (choose closest to you)
 4. Wait 2-3 minutes for setup

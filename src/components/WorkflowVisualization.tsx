@@ -4,7 +4,7 @@ import React from 'react';
  * WorkflowVisualization Component
  * 
  * Shows a beautiful, animated workflow diagram demonstrating
- * how OpsCentral transforms unstructured information into structured workflows.
+ * how Kovari transforms unstructured information into structured workflows.
  * 
  * Think of it like: Showing people the magic happening inside the machine!
  */
@@ -125,11 +125,11 @@ const WorkflowVisualization = () => {
             className="animated-connector delay-500"
           />
 
-          {/* PROCESSING: OpsCentral (Center) */}
+          {/* PROCESSING: Kovari (Center) */}
           <g className="glow-effect">
             <rect x="280" y="170" width="180" height="100" rx="12" fill="#0d9488" stroke="#14b8a6" strokeWidth="3" />
             <text x="370" y="205" textAnchor="middle" fontSize="16" fontWeight="bold" fill="white">
-              ⚡ OpsCentral
+              ⚡ Kovari
             </text>
             <text x="370" y="230" textAnchor="middle" fontSize="13" fill="#d1fae5">
               AI-Powered

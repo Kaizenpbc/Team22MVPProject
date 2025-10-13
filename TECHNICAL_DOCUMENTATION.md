@@ -1,4 +1,4 @@
-# OpsCentral - Technical Documentation
+# Kovari - Technical Documentation
 
 ## Table of Contents
 1. [System Overview](#system-overview)
@@ -14,7 +14,7 @@
 
 ## System Overview
 
-OpsCentral is a modern web application for booking product management demos. It provides a streamlined interface for potential customers to schedule appointments while collecting valuable information about their workflow challenges.
+Kovari is a modern web application for booking product management demos. It provides a streamlined interface for potential customers to schedule appointments while collecting valuable information about their workflow challenges.
 
 ### Key Features
 - User authentication and account management

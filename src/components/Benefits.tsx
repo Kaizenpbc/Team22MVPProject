@@ -5,31 +5,31 @@ const Benefits = () => {
   const benefits = [
     {
       icon: Clock,
-      title: 'Saving Time',
-      description: 'Streamline your processes and eliminate redundant tasks with automated workflows.',
+      title: 'Accelerate Digital Transformation',
+      description: 'Transform unstructured documents into automated workflows in minutes, not months.',
       color: 'text-primary-600 dark:text-primary-400',
-      phrase: 'Elevate your team\'s productivity instantly'
+      phrase: 'Speed & Efficiency'
     },
     {
       icon: Target,
-      title: 'Enhanced Accuracy',
-      description: 'Reduce errors with standardised procedures and real-time validation checks.',
+      title: 'Ensure Compliance',
+      description: 'Maintain audit trails and meet regulatory standards automatically across all workflows.',
       color: 'text-primary-600 dark:text-primary-400',
-      phrase: 'Transform your product management in real time'
+      phrase: 'Built-In Compliance'
     },
     {
       icon: Users,
-      title: 'Better Collaboration',
-      description: 'Foster seamless teamwork with centralised communication and shared resources.',
+      title: 'Unify Your Technology Stack',
+      description: 'Seamlessly integrate with existing ERP, CRM, and business systems for a single source of truth.',
       color: 'text-primary-600 dark:text-primary-400',
-      phrase: 'Centralise your workflow with ease'
+      phrase: 'Enterprise Integration'
     },
     {
       icon: Shield,
-      title: 'Enhanced Security',
-      description: 'Protect your workflows with enterprise-grade security and compliance standards.',
+      title: 'Gain Real-Time Insights',
+      description: 'Make data-driven decisions with intelligent analytics and performance dashboards.',
       color: 'text-primary-600 dark:text-primary-400',
-      phrase: 'Secure your operations with confidence'
+      phrase: 'Actionable Intelligence'
     }
   ];
 
@@ -38,12 +38,12 @@ const Benefits = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Why Choose OpsCentral?
+            Why Choose Kovari?
           </h2>
           <p className="text-lg text-primary-600 dark:text-primary-300 max-w-2xl mx-auto">
           </p>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Discover how our platform revolutionises your team's productivity and operational excellence.
+            Transform how your organization handles workflows, compliance, and data intelligence with our comprehensive AI-powered platform.
           </p>
         </div>
         

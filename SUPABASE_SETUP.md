@@ -1,6 +1,6 @@
 # Supabase Backend Setup Guide
 
-This guide will help you set up your Supabase backend for the OpsCentral booking system! Think of this as building instructions for your toy set - follow each step carefully! 🎯
+This guide will help you set up your Supabase backend for the Kovari booking system! Think of this as building instructions for your toy set - follow each step carefully! 🎯
 
 ## Prerequisites (What You Need First)
 
@@ -16,7 +16,7 @@ This guide will help you set up your Supabase backend for the OpsCentral booking
 1. Go to [supabase.com](https://supabase.com) and sign in
 2. Click **"New Project"**
 3. Fill in the details:
-   - **Project Name**: OpsCentral (or whatever you like!)
+   - **Project Name**: Kovari (or whatever you like!)
    - **Database Password**: Create a strong password and save it somewhere safe!
    - **Region**: Choose the one closest to you
 4. Click **"Create new project"** and wait a few minutes for it to set up

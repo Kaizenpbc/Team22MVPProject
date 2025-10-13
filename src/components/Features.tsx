@@ -1,31 +1,42 @@
 import React from 'react';
-import { Settings, Palette, Zap, Download } from 'lucide-react';
+import { Brain, Link2, BarChart3, Workflow, Shield } from 'lucide-react';
 
 const Features = () => {
   const features = [
     {
-      icon: Settings,
-      title: "Outline your team's workflow needs and goals",
-      description: "Define clear objectives and map out your team's unique requirements with our intuitive planning tools.",
-      phrase: "Plan your workflow strategy"
+      icon: Brain,
+      title: "Kovari",
+      tagline: "AI-powered workflow intelligence",
+      description: "Kovari is the central platform that transforms unstructured and structured data into actionable workflows, creating clarity, efficiency, and compliance across industries.",
+      phrase: "Flagship Product"
     },
     {
-      icon: Palette,
-      title: "Tailor features to perfectly match your teams' needs and preferences",
-      description: "Customise every aspect of the platform to align with your team's working style and operational requirements.",
-      phrase: "Customise your experience"
+      icon: Link2,
+      title: "Kovari Nexus",
+      tagline: "Integrations & APIs",
+      description: "Seamlessly connects Kovari with your existing ERP, CRM, and business systems, ensuring a single source of truth across the enterprise.",
+      phrase: "Connect Everything"
     },
     {
-      icon: Zap,
-      title: "Automatically produced, tailored workflows and updates in real time",
-      description: "Experience intelligent automation that creates and adjusts workflows dynamically based on your team's patterns.",
-      phrase: "Automate your processes"
+      icon: BarChart3,
+      title: "Kovari Insights",
+      tagline: "Analytics & Reporting",
+      description: "Transforms workflow data into real-time insights, compliance dashboards, and decision-ready reports, empowering smarter strategic choices.",
+      phrase: "Data-Driven Decisions"
     },
     {
-      icon: Download,
-      title: "Easily export your workflows for offline access",
-      description: "Take your workflows anywhere with seamless export functionality for complete operational flexibility.",
-      phrase: "Access anywhere, anytime"
+      icon: Workflow,
+      title: "Kovari Flow",
+      tagline: "Process Automation Builder",
+      description: "Empowers teams to design, optimize, and automate workflows with an intuitive, drag-and-drop interface without coding expertise.",
+      phrase: "No-Code Automation"
+    },
+    {
+      icon: Shield,
+      title: "Kovari Guard",
+      tagline: "Security & Compliance",
+      description: "Delivers end-to-end data protection, audit trails, and regulatory compliance for every workflow, building trust with regulators and stakeholders.",
+      phrase: "Enterprise-Grade Security"
     }
   ];
 
@@ -34,16 +45,16 @@ const Features = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Powerful Features for Modern Teams
+            The Kovari Product Suite
           </h2>
           <p className="text-lg text-primary-600 dark:text-primary-300 max-w-2xl mx-auto">
           </p>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Discover the comprehensive tools that make OpsCentral the ultimate platform for streamlined operations.
+            A complete ecosystem of intelligent tools that transform how your organization manages workflows, data, and compliance.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {features.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
@@ -59,7 +70,8 @@ const Features = () => {
                     {feature.phrase}
                   </span>
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 italic">{feature.tagline}</p>
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">{feature.description}</p>
               </div>
             );

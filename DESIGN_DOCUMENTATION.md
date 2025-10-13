@@ -1,4 +1,4 @@
-# OpsCentral - Design Documentation
+# Kovari - Design Documentation
 
 ## Table of Contents
 1. [Design Overview](#design-overview)
@@ -17,7 +17,7 @@
 ## Design Overview
 
 ### Design Philosophy
-OpsCentral follows a **user-centered design approach** that prioritizes simplicity, clarity, and efficiency. The design system emphasizes professional aesthetics while maintaining approachability for users across all technical skill levels.
+Kovari follows a **user-centered design approach** that prioritizes simplicity, clarity, and efficiency. The design system emphasizes professional aesthetics while maintaining approachability for users across all technical skill levels.
 
 ### Design Principles
 1. **Clarity First**: Every element serves a clear purpose
@@ -70,7 +70,7 @@ Landing Page → Learn About Product → Book Demo → Complete Form → Confirm
 
 #### Site Structure
 ```
-OpsCentral
+Kovari
 ├── Home (/)
 │   ├── Hero Section
 │   ├── Features
@@ -330,7 +330,7 @@ font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto
 
 #### Logo Design
 - **Icon**: Workflow/process icon representing optimization
-- **Typography**: Montserrat Bold for "OpsCentral"
+- **Typography**: Montserrat Bold for "Kovari"
 - **Color**: Primary blue (#3b82f6)
 - **Usage**: Consistent across all touchpoints
 
@@ -749,4 +749,4 @@ src/styles/
 
 ---
 
-This design documentation provides a comprehensive guide for maintaining consistency and quality in the OpsCentral user interface. It should be updated as the design system evolves and new patterns emerge.
+This design documentation provides a comprehensive guide for maintaining consistency and quality in the Kovari user interface. It should be updated as the design system evolves and new patterns emerge.
