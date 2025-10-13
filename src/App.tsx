@@ -10,6 +10,7 @@ import Book from './pages/Book';
 import Pricing from './pages/Pricing';
 import Dashboard from './pages/Dashboard';
 import WorkflowCreator from './pages/WorkflowCreator';
+import Credits from './pages/Credits';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Cookies from './pages/Cookies';
@@ -51,6 +52,7 @@ function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/workflow-creator" element={<WorkflowCreator />} />
+        <Route path="/credits" element={<Credits />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/cookies" element={<Cookies />} />

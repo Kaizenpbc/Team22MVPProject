@@ -1,12 +1,26 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Workflow, LogOut, User as UserIcon } from 'lucide-react';
+import { Menu, X, Workflow, LogOut, User as UserIcon, Coins } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '../contexts/AuthContext';
+import { getCreditBalance } from '../services/creditsService';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [credits, setCredits] = React.useState<number>(0);
   const { user, signOut } = useAuth();
+
+  React.useEffect(() => {
+    if (user) {
+      loadCredits();
+    }
+  }, [user]);
+
+  const loadCredits = async () => {
+    if (!user) return;
+    const balance = await getCreditBalance(user.id);
+    setCredits(balance.credits);
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -40,6 +54,14 @@ const Header = () => {
             <ThemeToggle />
             {user ? (
               <>
+                    <Link
+                      to="/credits"
+                      className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-all shadow-md hover:shadow-lg"
+                      title="Buy Credits"
+                    >
+                      <Coins className="w-4 h-4" />
+                      <span className="font-bold">{credits}</span>
+                    </Link>
                     <Link
                       to="/dashboard"
                       className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors"

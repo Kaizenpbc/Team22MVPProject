@@ -15,6 +15,7 @@ import DuplicateDetectionPanel from '../analysis/DuplicateDetectionPanel';
 import { WorkflowTemplate } from '../../../utils/workflow/workflowTemplates';
 import { runComprehensiveAnalysis, ComprehensiveAnalysis } from '../../../utils/workflow/comprehensiveWorkflowAnalysis';
 import { WorkflowStep } from '../../../utils/workflow/workflowEditor';
+import { hasEnoughCredits, useAIParse, useAIAnalysis, CREDIT_COSTS, getCreditBalance } from '../../../services/creditsService';
 
 /**
  * User Workflow Interface
@@ -90,16 +91,52 @@ const UserWorkflowInterface: React.FC = () => {
     setShowReorderView(false);
   };
 
-  // Run comprehensive analysis
+  // Run comprehensive analysis (WITH CREDIT CHECK)
   const runAnalysis = async () => {
     if (workflow.length === 0) return;
+
+    if (!user) {
+      alert('Please sign in to use AI analysis!');
+      return;
+    }
+
+    // Check if user has enough credits
+    const hasCredits = await hasEnoughCredits(user.id, CREDIT_COSTS.AI_ANALYSIS);
+    if (!hasCredits) {
+      const balance = await getCreditBalance(user.id);
+      const confirmed = window.confirm(
+        `⚠️ Not Enough Credits!\n\n` +
+        `You have: ${balance.credits} credits\n` +
+        `AI Analysis costs: ${CREDIT_COSTS.AI_ANALYSIS} credits\n\n` +
+        `Would you like to buy more credits?`
+      );
+      if (confirmed) {
+        window.location.href = '/credits';
+      }
+      return;
+    }
     
     try {
+      // DEDUCT CREDITS FIRST
+      const deducted = await useAIAnalysis(user.id, 'Workflow');
+      if (!deducted) {
+        throw new Error('Failed to deduct credits');
+      }
+
+      // Then run analysis
       const analysis = await runComprehensiveAnalysis(workflow, null, 'My Workflow');
       setComprehensiveAnalysis(analysis);
       setShowAnalyticsDashboard(true);
+
+      // Update balance
+      const newBalance = await getCreditBalance(user.id);
+      console.log(`✅ Analysis complete! ${CREDIT_COSTS.AI_ANALYSIS} credits used. Balance: ${newBalance.credits}`);
     } catch (error) {
       console.error('Error running analysis:', error);
+      if (error instanceof Error && error.message === 'NOT_ENOUGH_CREDITS') {
+        alert('Not enough credits! Please buy more credits.');
+        window.location.href = '/credits';
+      }
     }
   };
 
@@ -144,29 +181,67 @@ const UserWorkflowInterface: React.FC = () => {
     }
   };
 
-  // Parse with AI using OpenAI
+  // Parse with AI using OpenAI (WITH CREDIT CHECK)
   const parseWithAI = async () => {
     if (!sopText.trim()) {
       alert('Please enter some SOP text first!');
       return;
     }
 
+    if (!user) {
+      alert('Please sign in to use AI features!');
+      return;
+    }
+
+    // Check if user has enough credits
+    const hasCredits = await hasEnoughCredits(user.id, CREDIT_COSTS.AI_PARSE);
+    if (!hasCredits) {
+      const balance = await getCreditBalance(user.id);
+      const confirmed = window.confirm(
+        `⚠️ Not Enough Credits!\n\n` +
+        `You have: ${balance.credits} credits\n` +
+        `AI Parse costs: ${CREDIT_COSTS.AI_PARSE} credits\n\n` +
+        `Would you like to buy more credits?`
+      );
+      if (confirmed) {
+        window.location.href = '/credits';
+      }
+      return;
+    }
+
     setIsParsingWithAI(true);
     
     try {
+      // DEDUCT CREDITS FIRST
+      const deducted = await useAIParse(user.id, 'Workflow');
+      if (!deducted) {
+        throw new Error('Failed to deduct credits');
+      }
+
+      // Then run AI parsing
       const { parseWithAIFallback } = await import('../../../utils/workflow/aiWorkflowParser');
       const aiParsedSteps = await parseWithAIFallback(sopText);
       
       setWorkflow(aiParsedSteps);
       
-      // Auto-run analysis after AI parsing
+      // Auto-run analysis after AI parsing  
       setTimeout(() => runAnalysis(), 500);
       
-      // Show success message
-      alert(`✨ AI successfully parsed ${aiParsedSteps.length} workflow steps!`);
+      // Update credit balance in parent
+      const newBalance = await getCreditBalance(user.id);
+      
+      // Show success message with credit usage
+      alert(`✨ AI successfully parsed ${aiParsedSteps.length} workflow steps!\n\n` +
+            `Credits used: ${CREDIT_COSTS.AI_PARSE}\n` +
+            `Remaining balance: ${newBalance.credits} credits`);
     } catch (error) {
       console.error('Error parsing with AI:', error);
-      alert(`AI parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}. Try the basic parser instead.`);
+      if (error instanceof Error && error.message === 'NOT_ENOUGH_CREDITS') {
+        alert('Not enough credits! Please buy more credits to use AI features.');
+        window.location.href = '/credits';
+      } else {
+        alert(`AI parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}. Try the basic parser instead.`);
+      }
     } finally {
       setIsParsingWithAI(false);
     }
