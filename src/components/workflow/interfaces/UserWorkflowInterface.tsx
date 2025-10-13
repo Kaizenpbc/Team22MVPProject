@@ -3,7 +3,7 @@ import { BookTemplate, ArrowUpDown, BarChart3, MessageCircle } from 'lucide-reac
 import { useAuth } from '../../../contexts/AuthContext';
 import FileUploadComponent from '../core/FileUploadComponent.tsx';
 import WorkflowEditor from '../core/WorkflowEditor.tsx';
-import WorkflowFlowchart from '../visualization/WorkflowFlowchart.tsx';
+import EnhancedWorkflowFlowchart from '../visualization/EnhancedWorkflowFlowchart';
 import WorkflowAnalysisPanel from '../analysis/WorkflowAnalysisPanel.tsx';
 import ExportPanel from '../export/ExportPanel.tsx';
 import WorkflowTemplateSelector from '../templates/WorkflowTemplateSelector';
@@ -249,14 +249,23 @@ const UserWorkflowInterface: React.FC = () => {
         {/* Right Column - Visualization & Analysis */}
         <div className="space-y-6">
           
-          {/* Workflow Visualization */}
+          {/* Workflow Visualization - Interactive ReactFlow */}
           {workflow.length > 0 ? (
-            <WorkflowFlowchart workflow={workflow} />
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="p-4 bg-gradient-to-r from-primary-600 to-accent-600 text-white">
+                <h3 className="font-bold text-lg">🔄 Interactive Workflow Diagram</h3>
+                <p className="text-sm text-white text-opacity-90">Drag nodes • Zoom with mouse wheel • Pan by dragging</p>
+              </div>
+              <EnhancedWorkflowFlowchart 
+                steps={workflow} 
+                analysis={comprehensiveAnalysis}
+              />
+            </div>
           ) : (
             <div className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center">
               <div className="text-4xl mb-4">📊</div>
               <p className="text-gray-600 dark:text-gray-400">
-                Enter SOP text and click "Create Workflow" to see your workflow diagram here
+                Enter SOP text and click "Create Workflow" to see your interactive flowchart here
               </p>
             </div>
           )}
