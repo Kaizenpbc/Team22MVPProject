@@ -317,9 +317,9 @@ const UserWorkflowInterface: React.FC = () => {
         </div>
       </div>
 
-      {/* Orange Warning Boxes - Gaps & Duplicates */}
-      {comprehensiveAnalysis && (
-        <div className="space-y-4">
+      {/* Orange Warning Boxes - Gaps & Duplicates (Show below visualization) */}
+      {workflow.length > 0 && comprehensiveAnalysis && (
+        <div className="mt-6 space-y-4">
           {/* Gap Detection Orange Box */}
           {comprehensiveAnalysis.gaps?.internalGaps?.missingSteps && comprehensiveAnalysis.gaps.internalGaps.missingSteps.length > 0 && (
             <GapDetectionPanel
@@ -335,6 +335,8 @@ const UserWorkflowInterface: React.FC = () => {
                 const newSteps = [...workflow, newStep];
                 setWorkflow(newSteps);
                 setSopText(newSteps.map((s, i) => `${i + 1}. ${s.text}`).join('\n'));
+                // Re-run analysis after adding
+                setTimeout(() => runAnalysis(), 500);
               }}
             />
           )}
@@ -355,12 +357,29 @@ const UserWorkflowInterface: React.FC = () => {
                 newSteps.splice(step2Index, 1);
                 setWorkflow(newSteps);
                 setSopText(newSteps.map((s, i) => `${i + 1}. ${s.text}`).join('\n'));
+                // Re-run analysis after merging
+                setTimeout(() => runAnalysis(), 500);
               }}
               onKeepBoth={(index) => {
                 // Just acknowledge - keep both steps
                 console.log('User chose to keep both steps for duplicate pair', index);
               }}
             />
+          )}
+
+          {/* Show message if analysis ran but no issues found */}
+          {comprehensiveAnalysis && 
+           (!comprehensiveAnalysis.gaps?.internalGaps?.missingSteps || comprehensiveAnalysis.gaps.internalGaps.missingSteps.length === 0) &&
+           (!comprehensiveAnalysis.duplicates || comprehensiveAnalysis.duplicates.length === 0) && (
+            <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-400 rounded-xl p-6 text-center">
+              <div className="text-4xl mb-3">✅</div>
+              <h3 className="text-lg font-bold text-green-800 dark:text-green-200 mb-2">
+                Workflow Looks Great!
+              </h3>
+              <p className="text-green-700 dark:text-green-300 text-sm">
+                No gaps or duplicates detected. Your workflow is well-structured!
+              </p>
+            </div>
           )}
         </div>
       )}
