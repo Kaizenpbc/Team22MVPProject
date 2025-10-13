@@ -179,7 +179,7 @@ const UserWorkflowInterface: React.FC = () => {
             👋 Welcome, <span className="font-semibold">{user?.email}</span>! 
             <span className="ml-2 text-primary-600 dark:text-primary-400 font-bold">(Standard User)</span>
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setShowTemplateSelector(true)}
               className="px-3 py-1 bg-white dark:bg-gray-800 border border-primary-300 dark:border-primary-700 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors text-sm flex items-center gap-2"
@@ -189,6 +189,44 @@ const UserWorkflowInterface: React.FC = () => {
             </button>
             {workflow.length > 0 && (
               <>
+                <button
+                  onClick={() => {
+                    const newWindow = window.open('', '_blank', 'width=1200,height=800');
+                    if (newWindow) {
+                      newWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <title>Workflow - Full Screen View</title>
+                          <style>
+                            body { margin: 0; padding: 20px; font-family: Arial, sans-serif; background: #f5f5f5; }
+                            h1 { color: #333; }
+                            .step { padding: 15px; margin: 10px 0; background: white; border-left: 4px solid #2196F3; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                            .step-number { font-weight: bold; color: #2196F3; font-size: 1.2em; }
+                          </style>
+                        </head>
+                        <body>
+                          <h1>📋 Workflow - Full Screen View</h1>
+                          ${workflow.map((s, i) => `
+                            <div class="step">
+                              <span class="step-number">${i + 1}.</span> ${s.text}
+                            </div>
+                          `).join('')}
+                          <div style="margin-top: 20px; text-align: center; color: #666;">
+                            <button onclick="window.print()" style="padding: 10px 20px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">🖨️ Print</button>
+                            <button onclick="window.close()" style="margin-left: 10px; padding: 10px 20px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
+                          </div>
+                        </body>
+                        </html>
+                      `);
+                      newWindow.document.close();
+                    }
+                  }}
+                  className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors text-sm flex items-center gap-2"
+                  title="Open in new window"
+                >
+                  🖥️ Full Screen
+                </button>
                 <button
                   onClick={() => setShowReorderView(true)}
                   className="px-3 py-1 bg-white dark:bg-gray-800 border border-primary-300 dark:border-primary-700 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors text-sm flex items-center gap-2"
