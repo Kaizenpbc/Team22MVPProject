@@ -10,6 +10,8 @@ import WorkflowTemplateSelector from '../templates/WorkflowTemplateSelector';
 import WorkflowReorderingView from '../visualization/WorkflowReorderingView';
 import AnalyticsDashboard from '../analysis/AnalyticsDashboard';
 import WorkflowChatPanel from '../chat/WorkflowChatPanel';
+import GapDetectionPanel from '../analysis/GapDetectionPanel';
+import DuplicateDetectionPanel from '../analysis/DuplicateDetectionPanel';
 import { WorkflowTemplate } from '../../../utils/workflow/workflowTemplates';
 import { runComprehensiveAnalysis, ComprehensiveAnalysis } from '../../../utils/workflow/comprehensiveWorkflowAnalysis';
 import { WorkflowStep } from '../../../utils/workflow/workflowEditor';
@@ -314,6 +316,54 @@ const UserWorkflowInterface: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Orange Warning Boxes - Gaps & Duplicates */}
+      {comprehensiveAnalysis && (
+        <div className="space-y-4">
+          {/* Gap Detection Orange Box */}
+          {comprehensiveAnalysis.gaps?.internalGaps?.missingSteps && comprehensiveAnalysis.gaps.internalGaps.missingSteps.length > 0 && (
+            <GapDetectionPanel
+              missingSteps={comprehensiveAnalysis.gaps.internalGaps.missingSteps}
+              onAddStep={(stepText, index) => {
+                // Add the missing step to the workflow
+                const newStep = {
+                  id: `added-step-${Date.now()}`,
+                  text: stepText,
+                  type: 'process',
+                  name: stepText
+                };
+                const newSteps = [...workflow, newStep];
+                setWorkflow(newSteps);
+                setSopText(newSteps.map((s, i) => `${i + 1}. ${s.text}`).join('\n'));
+              }}
+            />
+          )}
+
+          {/* Duplicate Detection Orange Box */}
+          {comprehensiveAnalysis.duplicates && comprehensiveAnalysis.duplicates.length > 0 && (
+            <DuplicateDetectionPanel
+              duplicates={comprehensiveAnalysis.duplicates}
+              onMergeSteps={(step1Index, step2Index) => {
+                // Merge the two steps
+                const newSteps = [...workflow];
+                const mergedText = `${newSteps[step1Index].text} AND ${newSteps[step2Index].text}`;
+                newSteps[step1Index] = {
+                  ...newSteps[step1Index],
+                  text: mergedText,
+                  name: mergedText
+                };
+                newSteps.splice(step2Index, 1);
+                setWorkflow(newSteps);
+                setSopText(newSteps.map((s, i) => `${i + 1}. ${s.text}`).join('\n'));
+              }}
+              onKeepBoth={(index) => {
+                // Just acknowledge - keep both steps
+                console.log('User chose to keep both steps for duplicate pair', index);
+              }}
+            />
+          )}
+        </div>
+      )}
 
       {/* Template Selector Modal */}
       {showTemplateSelector && (
