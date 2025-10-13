@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookTemplate, ArrowUpDown, BarChart3 } from 'lucide-react';
+import { BookTemplate, ArrowUpDown, BarChart3, MessageCircle } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import FileUploadComponent from '../core/FileUploadComponent.tsx';
 import WorkflowEditor from '../core/WorkflowEditor.tsx';
@@ -9,6 +9,7 @@ import ExportPanel from '../export/ExportPanel.tsx';
 import WorkflowTemplateSelector from '../templates/WorkflowTemplateSelector';
 import WorkflowReorderingView from '../visualization/WorkflowReorderingView';
 import AnalyticsDashboard from '../analysis/AnalyticsDashboard';
+import WorkflowChatPanel from '../chat/WorkflowChatPanel';
 import { WorkflowTemplate } from '../../../utils/workflow/workflowTemplates';
 import { runComprehensiveAnalysis, ComprehensiveAnalysis } from '../../../utils/workflow/comprehensiveWorkflowAnalysis';
 import { WorkflowStep } from '../../../utils/workflow/workflowEditor';
@@ -23,9 +24,11 @@ const UserWorkflowInterface: React.FC = () => {
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [workflow, setWorkflow] = useState<WorkflowStep[]>([]);
   const [isCreating, setIsCreating] = useState(false);
+  const [isParsingWithAI, setIsParsingWithAI] = useState(false);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [showReorderView, setShowReorderView] = useState(false);
   const [showAnalyticsDashboard, setShowAnalyticsDashboard] = useState(false);
+  const [showChatPanel, setShowChatPanel] = useState(false);
   const [comprehensiveAnalysis, setComprehensiveAnalysis] = useState<ComprehensiveAnalysis | null>(null);
 
   // Handle file upload with PDF support
@@ -98,7 +101,7 @@ const UserWorkflowInterface: React.FC = () => {
     }
   };
 
-  // Create workflow from SOP text using REAL AI
+  // Create workflow from SOP text using basic parser
   const createWorkflow = async () => {
     if (!sopText.trim()) {
       alert('Please enter some SOP text first!');
@@ -108,7 +111,7 @@ const UserWorkflowInterface: React.FC = () => {
     setIsCreating(true);
     
     try {
-      // Use the real workflow parser
+      // Use the basic workflow parser
       const { parseSteps } = await import('../../../utils/workflow/workflowEditor');
       const parsedSteps = parseSteps(sopText);
       
@@ -136,6 +139,34 @@ const UserWorkflowInterface: React.FC = () => {
       alert('Error creating workflow. Please try again.');
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  // Parse with AI using OpenAI
+  const parseWithAI = async () => {
+    if (!sopText.trim()) {
+      alert('Please enter some SOP text first!');
+      return;
+    }
+
+    setIsParsingWithAI(true);
+    
+    try {
+      const { parseWithAIFallback } = await import('../../../utils/workflow/aiWorkflowParser');
+      const aiParsedSteps = await parseWithAIFallback(sopText);
+      
+      setWorkflow(aiParsedSteps);
+      
+      // Auto-run analysis after AI parsing
+      setTimeout(() => runAnalysis(), 500);
+      
+      // Show success message
+      alert(`✨ AI successfully parsed ${aiParsedSteps.length} workflow steps!`);
+    } catch (error) {
+      console.error('Error parsing with AI:', error);
+      alert(`AI parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}. Try the basic parser instead.`);
+    } finally {
+      setIsParsingWithAI(false);
     }
   };
 
@@ -172,6 +203,13 @@ const UserWorkflowInterface: React.FC = () => {
                   <BarChart3 className="w-4 h-4" />
                   Analytics
                 </button>
+                <button
+                  onClick={() => setShowChatPanel(true)}
+                  className="px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-colors text-sm flex items-center gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  AI Chat
+                </button>
               </>
             )}
           </div>
@@ -197,7 +235,9 @@ const UserWorkflowInterface: React.FC = () => {
             value={sopText}
             onChange={setSopText}
             onCreateWorkflow={createWorkflow}
+            onParseWithAI={parseWithAI}
             isCreating={isCreating}
+            isParsingWithAI={isParsingWithAI}
           />
 
           {/* Export Panel */}
@@ -265,6 +305,23 @@ const UserWorkflowInterface: React.FC = () => {
               </button>
             </div>
             <AnalyticsDashboard analysis={comprehensiveAnalysis} />
+          </div>
+        </div>
+      )}
+
+      {/* AI Chat Panel Modal */}
+      {showChatPanel && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="max-w-2xl w-full">
+            <WorkflowChatPanel
+              steps={workflow}
+              analysis={comprehensiveAnalysis}
+              onWorkflowEdit={(newSteps) => {
+                setWorkflow(newSteps);
+                setSopText(newSteps.map((s, i) => `${i + 1}. ${s.text}`).join('\n'));
+              }}
+              onClose={() => setShowChatPanel(false)}
+            />
           </div>
         </div>
       )}

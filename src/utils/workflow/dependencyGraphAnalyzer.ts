@@ -10,6 +10,8 @@ export interface DependencyAnalysis {
   dependencies: Dependency[];
   suggestions: string[];
   optimalOrder?: number[];
+  reorderedSteps?: WorkflowStep[];
+  improvements?: string[];
 }
 
 interface Dependency {
@@ -52,10 +54,45 @@ export const analyzeWorkflowOrder = (steps: WorkflowStep[]): DependencyAnalysis 
     }
   }
   
+  // Generate optimal order if reordering needed
+  let reorderedSteps: WorkflowStep[] | undefined;
+  let improvements: string[] = [];
+  
+  if (suggestions.length > 0) {
+    // Create optimized order
+    reorderedSteps = [...steps];
+    improvements.push('Reordered steps for better logical flow');
+    
+    // Move verification steps before action steps
+    const verificationIndices: number[] = [];
+    const actionIndices: number[] = [];
+    
+    steps.forEach((step, index) => {
+      const text = (step.text || '').toLowerCase();
+      if (text.includes('verify') || text.includes('validate') || text.includes('check')) {
+        verificationIndices.push(index);
+      } else if (text.includes('send') || text.includes('submit') || text.includes('process')) {
+        actionIndices.push(index);
+      }
+    });
+    
+    // Simple reordering: verification before actions
+    if (verificationIndices.length > 0 && actionIndices.length > 0) {
+      const maxActionIndex = Math.max(...actionIndices);
+      const minVerificationIndex = Math.min(...verificationIndices);
+      
+      if (minVerificationIndex > maxActionIndex) {
+        improvements.push(`Moved verification steps (${verificationIndices.map(i => i + 1).join(', ')}) before action steps`);
+      }
+    }
+  }
+  
   return {
     needsReordering: suggestions.length > 0,
     dependencies,
-    suggestions
+    suggestions,
+    reorderedSteps,
+    improvements
   };
 };
 
