@@ -9,6 +9,7 @@ import { calculateWeightedEfficiency, EfficiencyAnalysis } from './smartEfficien
 import { analyzeWorkflowRisks, RiskAnalysis } from './riskMatrixCalculator';
 import { analyzeWorkflowOrder, DependencyAnalysis } from './dependencyGraphAnalyzer';
 import { detectInternalGaps, getIndustryBestPractices, GapAnalysis } from './intelligentGapDetection';
+import { analyzeDomainAgnosticGaps, ComprehensiveGapAnalysis } from './aiDomainAgnosticGapAnalysis';
 
 export interface ComprehensiveAnalysis {
   workflowName: string;
@@ -18,6 +19,7 @@ export interface ComprehensiveAnalysis {
   risks: RiskAnalysis | null;
   dependencies: DependencyAnalysis | null;
   gaps: GapAnalysis | null;
+  domainAgnosticGaps: ComprehensiveGapAnalysis | null;
   timestamp: string;
   error?: string;
 }
@@ -30,7 +32,7 @@ export const runComprehensiveAnalysis = async (
   apiKey: string | null = null,
   workflowName: string = 'Workflow'
 ): Promise<ComprehensiveAnalysis> => {
-  console.log('🧠 Starting comprehensive analysis with 5 AI improvements...');
+  console.log('🧠 Starting comprehensive analysis with 6 AI improvements...');
   
   try {
     // Parse steps if needed
@@ -53,7 +55,7 @@ export const runComprehensiveAnalysis = async (
     
     console.log(`📊 Analyzing ${steps.length} steps...`);
     
-    // Run all 5 analyses in parallel where possible
+    // Run all 6 analyses in parallel where possible
     const analysisPromises = [];
     
     // 1. Semantic Duplicate Detection (async - uses AI if key provided)
@@ -91,6 +93,12 @@ export const runComprehensiveAnalysis = async (
       })
     );
     
+    // 6. Domain-Agnostic Gap Analysis (async - uses AI if key provided)
+    console.log('6️⃣ Running domain-agnostic gap analysis...');
+    analysisPromises.push(
+      analyzeDomainAgnosticGaps(steps, apiKey)
+    );
+    
     // Wait for all analyses to complete
     const results = await Promise.all(analysisPromises);
     const duplicates = results[0] as any[];
@@ -98,14 +106,17 @@ export const runComprehensiveAnalysis = async (
     const risks = results[2] as RiskAnalysis;
     const dependencies = results[3] as DependencyAnalysis;
     const gaps = results[4] as GapAnalysis;
+    const domainAgnosticGaps = results[5] as ComprehensiveGapAnalysis;
     
-    console.log('✅ All 5 analyses complete!');
+    console.log('✅ All 6 analyses complete!');
     console.log('📊 Results summary:', {
       duplicates: duplicates.length,
       efficiencyScore: efficiency?.overallScore,
       riskScore: risks?.totalRiskScore,
       needsReordering: dependencies?.needsReordering,
-      gapsFound: gaps?.internalGaps?.summary?.total
+      gapsFound: gaps?.internalGaps?.summary?.total,
+      domainAgnosticGaps: domainAgnosticGaps?.summary?.total,
+      detectedDomain: domainAgnosticGaps?.domain
     });
     
     return {
@@ -116,6 +127,7 @@ export const runComprehensiveAnalysis = async (
       risks,
       dependencies,
       gaps,
+      domainAgnosticGaps,
       timestamp: new Date().toISOString()
     };
     
@@ -129,6 +141,7 @@ export const runComprehensiveAnalysis = async (
       risks: null,
       dependencies: null,
       gaps: null,
+      domainAgnosticGaps: null,
       timestamp: new Date().toISOString(),
       error: error instanceof Error ? error.message : 'Unknown error'
     };

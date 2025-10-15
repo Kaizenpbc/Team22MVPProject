@@ -12,6 +12,44 @@ export interface WorkflowStep {
 }
 
 /**
+ * Detect if a step represents an implicit decision in intimate workflows
+ */
+const isIntimateDecisionStep = (text: string): boolean => {
+  const lowerText = text.toLowerCase();
+  
+  // Intimate workflow decision patterns - steps that represent binary choices
+  const intimateDecisionPatterns = [
+    // Foreplay decisions
+    /kiss.*next/i,
+    /touch.*partner/i,
+    /caress.*her/i,
+    /foreplay/i,
+    
+    // Mood/consent decisions  
+    /ask.*permission/i,
+    /check.*consent/i,
+    /verify.*comfort/i,
+    
+    // Intimacy decisions
+    /insert.*vagina/i,
+    /penetrat/i,
+    /intimate.*relations/i,
+    
+    // Mood-setting decisions
+    /play.*music/i,
+    /have.*drink/i,
+    /set.*mood/i,
+    
+    // Any step that implies a choice to continue or stop
+    /next.*step/i,
+    /continue.*with/i,
+    /proceed.*to/i
+  ];
+  
+  return intimateDecisionPatterns.some(pattern => pattern.test(lowerText));
+};
+
+/**
  * Parse workflow steps from SOP text
  */
 export const parseSteps = (sopText: string): WorkflowStep[] => {
@@ -34,6 +72,8 @@ export const parseSteps = (sopText: string): WorkflowStep[] => {
         type = 'start';
       } else if (text.toLowerCase().includes('end') || text.toLowerCase().includes('complete')) {
         type = 'end';
+      } else if (isIntimateDecisionStep(text)) {
+        type = 'decision';
       }
       
       steps.push({

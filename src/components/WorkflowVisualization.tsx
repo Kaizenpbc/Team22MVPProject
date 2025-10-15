@@ -14,30 +14,17 @@ const WorkflowVisualization = () => {
       {/* CSS for flowing animations */}
       <style>{`
         @keyframes flow {
-          0% {
+          from {
             stroke-dashoffset: 0;
           }
-          100% {
-            stroke-dashoffset: -60;
+          to {
+            stroke-dashoffset: -40;
           }
         }
         .flowing-connector {
-          stroke-dasharray: 20 20;
-          animation: flow 1.2s linear infinite;
+          stroke-dasharray: 10 10;
+          animation: flow 0.8s linear infinite;
         }
-        @keyframes flow-reverse {
-          0% {
-            stroke-dashoffset: 60;
-          }
-          100% {
-            stroke-dashoffset: 0;
-          }
-        }
-        .flowing-connector-reverse {
-          stroke-dasharray: 20 20;
-          animation: flow-reverse 1.2s linear infinite;
-        }
-        .delay-1 { animation-delay: 0.3s; }
       `}</style>
 
       {/* Visualization Container */}
@@ -55,7 +42,7 @@ const WorkflowVisualization = () => {
 
         {/* SVG Workflow Diagram */}
         <svg 
-          viewBox="0 0 900 300" 
+          viewBox="0 0 950 300" 
           className="w-full h-auto"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -70,25 +57,25 @@ const WorkflowVisualization = () => {
             {/* Arrow markers */}
             <marker
               id="arrowhead"
-              markerWidth="12"
-              markerHeight="12"
-              refX="11"
-              refY="6"
+              markerWidth="6"
+              markerHeight="6"
+              refX="5"
+              refY="3"
               orient="auto"
               markerUnits="strokeWidth"
             >
-              <polygon points="0 0, 12 6, 0 12" fill="#0ea5e9" />
+              <polygon points="0 0, 6 3, 0 6" fill="#0ea5e9" />
             </marker>
             <marker
               id="arrowhead-reverse"
-              markerWidth="12"
-              markerHeight="12"
+              markerWidth="6"
+              markerHeight="6"
               refX="1"
-              refY="6"
+              refY="3"
               orient="auto"
               markerUnits="strokeWidth"
             >
-              <polygon points="12 0, 0 6, 12 12" fill="#0ea5e9" />
+              <polygon points="6 0, 0 3, 6 6" fill="#0ea5e9" />
             </marker>
 
             {/* Background subtle grid */}
@@ -97,7 +84,7 @@ const WorkflowVisualization = () => {
             </pattern>
           </defs>
 
-          <rect width="900" height="300" fill="url(#grid)" />
+          <rect width="950" height="300" fill="url(#grid)" />
 
           {/* Unstructured Inputs Box */}
           <g>
@@ -142,31 +129,23 @@ const WorkflowVisualization = () => {
             </g>
           </g>
 
-          {/* First Flowing Connector - Multiple lines for enhanced flow */}
-          <path
-            d="M 250 140 L 380 140"
-            stroke="url(#flow-gradient)"
-            strokeWidth="3"
-            fill="none"
-            markerEnd="url(#arrowhead)"
-            className="flowing-connector"
-          />
+          {/* First Flowing Connector */}
           <path
             d="M 250 150 L 380 150"
-            stroke="url(#flow-gradient)"
-            strokeWidth="4"
+            stroke="#2196F3"
+            strokeWidth="6"
+            strokeDasharray="15 10"
             fill="none"
             markerEnd="url(#arrowhead)"
-            className="flowing-connector-reverse"
-          />
-          <path
-            d="M 250 160 L 380 160"
-            stroke="url(#flow-gradient)"
-            strokeWidth="3"
-            fill="none"
-            markerEnd="url(#arrowhead)"
-            className="flowing-connector delay-1"
-          />
+          >
+            <animate
+              attributeName="stroke-dashoffset"
+              from="0"
+              to="-25"
+              dur="1s"
+              repeatCount="indefinite"
+            />
+          </path>
 
           {/* Kovari AI Engine Box */}
           <g>
@@ -180,31 +159,24 @@ const WorkflowVisualization = () => {
             </text>
           </g>
 
-          {/* Second Flowing Connector - Multiple lines for enhanced flow */}
-          <path
-            d="M 580 140 L 710 140"
-            stroke="url(#flow-gradient)"
-            strokeWidth="3"
-            fill="none"
-            markerEnd="url(#arrowhead)"
-            className="flowing-connector"
-          />
+          {/* Second Flowing Connector */}
           <path
             d="M 580 150 L 710 150"
-            stroke="url(#flow-gradient)"
-            strokeWidth="4"
+            stroke="#2196F3"
+            strokeWidth="6"
+            strokeDasharray="15 10"
             fill="none"
             markerEnd="url(#arrowhead)"
-            className="flowing-connector-reverse"
-          />
-          <path
-            d="M 580 160 L 710 160"
-            stroke="url(#flow-gradient)"
-            strokeWidth="3"
-            fill="none"
-            markerEnd="url(#arrowhead)"
-            className="flowing-connector delay-1"
-          />
+          >
+            <animate
+              attributeName="stroke-dashoffset"
+              from="0"
+              to="-25"
+              dur="1s"
+              repeatCount="indefinite"
+              begin="0.5s"
+            />
+          </path>
 
           {/* Structured Workflows Box */}
           <g>
@@ -249,6 +221,7 @@ const WorkflowVisualization = () => {
             </g>
           </g>
         </svg>
+
 
         {/* Stats below visualization */}
         <div className="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">

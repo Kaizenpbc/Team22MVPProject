@@ -282,4 +282,3 @@ const DuplicateDetectionPanel: React.FC<DuplicateDetectionPanelProps> = ({
 };
 
 export default DuplicateDetectionPanel;
-

@@ -27,6 +27,7 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
   steps, 
   analysis 
 }) => {
+  console.log('🚀 EnhancedWorkflowFlowchart RENDERED with steps:', steps.length);
   
   // Get node color based on risk
   const getNodeColor = (stepIndex: number): string => {
@@ -139,7 +140,11 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
       const stepTime = getStepTime(index);
       const isDecision = step.type === 'decision' ||
                          stepText.toLowerCase().includes('if ') ||
-                         stepText.toLowerCase().includes('?');
+                         stepText.toLowerCase().includes('?') ||
+                         stepText.toLowerCase().includes('kiss') ||
+                         stepText.toLowerCase().includes('insert') ||
+                         stepText.toLowerCase().includes('play') ||
+                         stepText.toLowerCase().includes('have');
 
       nodes.push({
         id: `step-${index}`,
@@ -164,6 +169,21 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
               }}>
                 {isDecision ? '🤔 ' : '📝 '}{stepText}
               </div>
+              
+              {isDecision && (
+                <div style={{
+                  fontSize: '10px',
+                  color: '#666',
+                  fontStyle: 'italic',
+                  marginTop: '5px',
+                  padding: '2px 6px',
+                  backgroundColor: '#f0f0f0',
+                  borderRadius: '3px',
+                  display: 'inline-block'
+                }}>
+                  Decision: Yes/No
+                </div>
+              )}
 
               {(effScore !== null || riskIcon || stepTime !== null) && (
                 <div style={{
@@ -247,9 +267,13 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
 
   // Build edges
   const buildEdges = useMemo((): Edge[] => {
+    console.log('🔨 buildEdges called with steps.length:', steps.length);
     const edges: Edge[] = [];
 
-    if (steps.length === 0) return edges;
+    if (steps.length === 0) {
+      console.log('⚠️ No steps, returning empty edges');
+      return edges;
+    }
 
     // Start to first step
     edges.push({
@@ -257,7 +281,10 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
       source: 'start',
       target: 'step-0',
       animated: true,
-      style: { stroke: '#4caf50', strokeWidth: 2 },
+      style: { 
+        stroke: '#4caf50', 
+        strokeWidth: 3
+      },
       markerEnd: {
         type: MarkerType.ArrowClosed,
         color: '#4caf50'
@@ -271,7 +298,10 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
         source: `step-${i}`,
         target: `step-${i + 1}`,
         animated: true,
-        style: { stroke: '#2196F3', strokeWidth: 2 },
+        style: { 
+          stroke: '#2196F3', 
+          strokeWidth: 3
+        },
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color: '#2196F3'
@@ -285,18 +315,26 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
       source: `step-${steps.length - 1}`,
       target: 'end',
       animated: true,
-      style: { stroke: '#4caf50', strokeWidth: 2 },
+      style: { 
+        stroke: '#4caf50', 
+        strokeWidth: 3
+      },
       markerEnd: {
         type: MarkerType.ArrowClosed,
         color: '#4caf50'
       }
     });
 
+    console.log('✅ buildEdges returning edges:', edges.length, edges);
     return edges;
   }, [steps]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(buildNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(buildEdges);
+
+  // Debug: Log edges to console
+  console.log('🔍 EnhancedWorkflowFlowchart edges:', edges);
+  console.log('🔍 EnhancedWorkflowFlowchart nodes:', nodes);
 
   return (
     <div style={{ width: '100%', height: '800px', backgroundColor: '#fafafa', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
@@ -331,6 +369,9 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
         nodesDraggable={true}
         nodesConnectable={false}
         elementsSelectable={true}
+        defaultEdgeOptions={{
+          style: { strokeWidth: 4, stroke: '#2196F3' }
+        }}
         fitView
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.5}

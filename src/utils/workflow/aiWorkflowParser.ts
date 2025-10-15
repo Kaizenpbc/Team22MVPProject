@@ -24,6 +24,7 @@ Analyze the following SOP text and extract workflow steps. For each step:
 1. Extract the main action or task
 2. Classify the type as: "start", "end", "decision", or "process"
 3. Number the steps sequentially
+4. Detect implicit decision points where binary choices exist (Yes/No branches)
 
 SOP Text:
 """
@@ -47,6 +48,8 @@ Rules:
 - Extract ALL steps, even if not explicitly numbered
 - Detect implicit steps (e.g., "After checking, notify manager" = two steps)
 - Use "decision" type for conditional steps (if/else, check, verify)
+- Use "decision" type for intimate workflow steps that represent binary choices (e.g., "Kiss her next" = decision to continue or stop)
+- Use "decision" type for any step where there's an implicit Yes/No choice
 - Use "start" for beginning steps, "end" for final steps
 - Use "process" for regular action steps
 - Provide confidence score (0-1) for extraction quality

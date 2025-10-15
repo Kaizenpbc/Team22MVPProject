@@ -207,4 +207,3 @@ const GapDetectionPanel: React.FC<GapDetectionPanelProps> = ({
 };
 
 export default GapDetectionPanel;
-

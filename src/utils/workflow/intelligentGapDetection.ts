@@ -52,6 +52,71 @@ export const detectInternalGaps = (steps: WorkflowStep[]): GapAnalysis['internal
   
   // CRITICAL GAPS - Break workflow logic
   
+  // Hygiene gaps - specific missing steps in hygiene workflows
+  const hasToiletUse = stepTexts.some(s => 
+    s.includes('poop') || s.includes('pee') || s.includes('toilet') || s.includes('bathroom')
+  );
+  const hasFlush = stepTexts.some(s => 
+    s.includes('flush') || s.includes('flush toilet')
+  );
+  
+  if (hasToiletUse && !hasFlush) {
+    missingSteps.push({
+      position: steps.length,
+      suggestion: 'Flush the toilet',
+      reason: 'Based on YOUR workflow: You used the toilet but never flushed it',
+      priority: 'CRITICAL',
+      type: 'missing-toilet-flush',
+      description: 'Your workflow includes toilet use but missing the flush step',
+      impact: 'Unhygienic and unsanitary conditions',
+      source: 'YOUR_WORKFLOW_LOGIC'
+    });
+  }
+  
+  // Wiping without proper disposal
+  const hasWiping = stepTexts.some(s => 
+    s.includes('wipe') || s.includes('toilet paper')
+  );
+  const hasDisposal = stepTexts.some(s => 
+    s.includes('dispose') || s.includes('throw away') || s.includes('trash')
+  );
+  
+  if (hasWiping && !hasDisposal) {
+    missingSteps.push({
+      position: steps.length,
+      suggestion: 'Dispose of toilet paper properly',
+      reason: 'Based on YOUR workflow: You wiped but never disposed of the toilet paper',
+      priority: 'HIGH',
+      type: 'missing-disposal',
+      description: 'Your workflow includes wiping but missing proper disposal',
+      impact: 'Unhygienic bathroom conditions',
+      source: 'YOUR_WORKFLOW_LOGIC'
+    });
+  }
+  
+  // Eating without washing hands before
+  const hasEating = stepTexts.some(s => 
+    s.includes('eat') || s.includes('food') || s.includes('meal')
+  );
+  const hasHandWashingBefore = stepTexts.some((s, index) => 
+    (s.includes('wash') || s.includes('cleanse')) && 
+    s.includes('hand') && 
+    index < stepTexts.findIndex(step => step.includes('eat') || step.includes('food'))
+  );
+  
+  if (hasEating && !hasHandWashingBefore) {
+    missingSteps.push({
+      position: 0,
+      suggestion: 'Wash hands before eating',
+      reason: 'Based on YOUR workflow: You eat food but never wash your hands first',
+      priority: 'HIGH',
+      type: 'missing-pre-eating-hygiene',
+      description: 'Your workflow includes eating but missing hand washing before',
+      impact: 'Risk of ingesting germs and bacteria',
+      source: 'YOUR_WORKFLOW_LOGIC'
+    });
+  }
+  
   // Data entry without verification
   const hasDataEntry = stepTexts.some(s =>
     s.includes('enter') || s.includes('input') || s.includes('type') || s.includes('collect')

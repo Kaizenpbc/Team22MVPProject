@@ -12,8 +12,11 @@ import AnalyticsDashboard from '../analysis/AnalyticsDashboard';
 import WorkflowChatPanel from '../chat/WorkflowChatPanel';
 import GapDetectionPanel from '../analysis/GapDetectionPanel';
 import DuplicateDetectionPanel from '../analysis/DuplicateDetectionPanel';
+import AIOrderingComparisonPanel from '../analysis/AIOrderingComparisonPanel';
+import { DomainAgnosticGapPanel } from '../analysis/DomainAgnosticGapPanel';
 import { WorkflowTemplate } from '../../../utils/workflow/workflowTemplates';
 import { runComprehensiveAnalysis, ComprehensiveAnalysis } from '../../../utils/workflow/comprehensiveWorkflowAnalysis';
+import { analyzeWorkflowOrdering } from '../../../utils/workflow/aiOrderingAnalysis';
 import { WorkflowStep } from '../../../utils/workflow/workflowEditor';
 import { hasEnoughCredits, useAIParse, useAIAnalysis, CREDIT_COSTS, getCreditBalance } from '../../../services/creditsService';
 import FullScreenWorkflow from '../FullScreenWorkflow';
@@ -37,6 +40,7 @@ const UserWorkflowInterface: React.FC = () => {
   const [showFullScreen, setShowFullScreen] = useState(false);
   const [showStepOptimization, setShowStepOptimization] = useState(false);
   const [comprehensiveAnalysis, setComprehensiveAnalysis] = useState<ComprehensiveAnalysis | null>(null);
+  const [orderingIssue, setOrderingIssue] = useState<any>(null);
 
   // Handle file upload with PDF support
   const handleFileUpload = async (file: File) => {
@@ -93,6 +97,34 @@ const UserWorkflowInterface: React.FC = () => {
     setWorkflow(reorderedSteps);
     setSopText(reorderedSteps.map((step, i) => `${i + 1}. ${step.text}`).join('\n'));
     setShowReorderView(false);
+  };
+
+  // Analyze workflow ordering when workflow changes
+  React.useEffect(() => {
+    if (workflow.length > 0) {
+      const analyzeOrdering = async () => {
+        // Get API key from localStorage (same as other AI features)
+        const apiKey = localStorage.getItem('openai_api_key');
+        const ordering = await analyzeWorkflowOrdering(workflow, apiKey);
+        console.log('🧠 Ordering analysis result:', ordering);
+        setOrderingIssue(ordering);
+      };
+      analyzeOrdering();
+    } else {
+      setOrderingIssue(null);
+    }
+  }, [workflow]);
+
+  // Handle applying suggested ordering
+  const handleApplySuggestedOrder = (newSteps: WorkflowStep[]) => {
+    setWorkflow(newSteps);
+    setSopText(newSteps.map((step, i) => `${i + 1}. ${step.text}`).join('\n'));
+    setOrderingIssue(null); // Clear the ordering issue after applying
+  };
+
+  // Handle keeping original order
+  const handleKeepOriginalOrder = () => {
+    setOrderingIssue(null); // Just dismiss the ordering issue
   };
 
   // Run comprehensive analysis (WITH CREDIT CHECK)
@@ -171,8 +203,18 @@ const UserWorkflowInterface: React.FC = () => {
           })) as WorkflowStep[];
         
         setWorkflow(fallbackSteps);
+        
+        // Update input area with numbered fallback steps
+        const { stepsToText } = await import('../../../utils/workflow/workflowEditor');
+        const numberedText = stepsToText(fallbackSteps);
+        setSopText(numberedText);
       } else {
         setWorkflow(parsedSteps);
+        
+        // Update input area with numbered parsed steps
+        const { stepsToText } = await import('../../../utils/workflow/workflowEditor');
+        const numberedText = stepsToText(parsedSteps);
+        setSopText(numberedText);
       }
 
       // Auto-run analysis after workflow creation
@@ -244,6 +286,11 @@ const UserWorkflowInterface: React.FC = () => {
       console.log('✨ AI parsing completed:', aiParsedSteps.length, 'steps');
 
       setWorkflow(aiParsedSteps);
+      
+      // Update input area with numbered steps
+      const { stepsToText } = await import('../../../utils/workflow/workflowEditor');
+      const numberedText = stepsToText(aiParsedSteps);
+      setSopText(numberedText);
       
       // Show step optimization panel after parsing
       setTimeout(() => {
@@ -330,6 +377,106 @@ const UserWorkflowInterface: React.FC = () => {
         </div>
       </div>
 
+      {/* Orange Warning Boxes - Gaps & Duplicates - Show First! */}
+      {comprehensiveAnalysis && (
+        <div className="space-y-4 mb-6">
+          {/* Gap Detection Orange Box */}
+          {comprehensiveAnalysis.gaps?.internalGaps?.missingSteps && comprehensiveAnalysis.gaps.internalGaps.missingSteps.length > 0 && (
+            <GapDetectionPanel
+              missingSteps={comprehensiveAnalysis.gaps.internalGaps.missingSteps}
+              onAddStep={(stepText, index) => {
+                // Add the missing step to the workflow
+                const newStep = {
+                  id: `added-step-${Date.now()}`,
+                  text: stepText,
+                  type: 'process',
+                  name: stepText
+                };
+                const newSteps = [...workflow, newStep];
+                setWorkflow(newSteps);
+                setSopText(newSteps.map((s, i) => `${i + 1}. ${s.text}`).join('\n'));
+              }}
+            />
+          )}
+
+          {/* Duplicate Detection Orange Box */}
+          {comprehensiveAnalysis.duplicates && comprehensiveAnalysis.duplicates.length > 0 && (
+            <DuplicateDetectionPanel
+              duplicates={comprehensiveAnalysis.duplicates}
+              onMergeSteps={(step1Index, step2Index) => {
+                // Merge the two steps
+                const newSteps = [...workflow];
+                const mergedText = `${newSteps[step1Index].text} AND ${newSteps[step2Index].text}`;
+                newSteps[step1Index] = {
+                  ...newSteps[step1Index],
+                  text: mergedText,
+                  name: mergedText
+                };
+                newSteps.splice(step2Index, 1);
+                setWorkflow(newSteps);
+                setSopText(newSteps.map((s, i) => `${i + 1}. ${s.text}`).join('\n'));
+                // Re-run analysis after merging
+                setTimeout(() => runAnalysis(), 500);
+              }}
+              onKeepBoth={(index) => {
+                // Just acknowledge - keep both steps
+                console.log('User chose to keep both steps for duplicate pair', index);
+              }}
+            />
+          )}
+
+          {/* Domain-Agnostic Gap Detection Orange Box - NEW! */}
+          {comprehensiveAnalysis.domainAgnosticGaps && comprehensiveAnalysis.domainAgnosticGaps.summary.total > 0 && (
+            console.log('🔍 Domain-Agnostic Gap Panel condition:', {
+              exists: !!comprehensiveAnalysis.domainAgnosticGaps,
+              total: comprehensiveAnalysis.domainAgnosticGaps?.summary?.total
+            })
+          )}
+          {comprehensiveAnalysis.domainAgnosticGaps && comprehensiveAnalysis.domainAgnosticGaps.summary.total > 0 && (
+            <DomainAgnosticGapPanel
+              analysis={comprehensiveAnalysis.domainAgnosticGaps}
+              onAddStep={(stepText, position) => {
+                // Add the missing step to the workflow at the specified position
+                const newStep = {
+                  id: `added-step-${Date.now()}`,
+                  text: stepText,
+                  type: 'process',
+                  name: stepText
+                };
+                const newSteps = [...workflow];
+                if (position === 0) {
+                  newSteps.unshift(newStep);
+                } else if (position >= newSteps.length) {
+                  newSteps.push(newStep);
+                } else {
+                  newSteps.splice(position, 0, newStep);
+                }
+                setWorkflow(newSteps);
+                setSopText(newSteps.map((s, i) => `${i + 1}. ${s.text}`).join('\n'));
+                // Re-run analysis after adding step
+                setTimeout(() => runAnalysis(), 500);
+              }}
+            />
+          )}
+
+          {/* Show message if analysis ran but no issues found */}
+          {comprehensiveAnalysis && 
+           (!comprehensiveAnalysis.gaps?.internalGaps?.missingSteps || comprehensiveAnalysis.gaps.internalGaps.missingSteps.length === 0) &&
+           (!comprehensiveAnalysis.duplicates || comprehensiveAnalysis.duplicates.length === 0) &&
+           (!comprehensiveAnalysis.domainAgnosticGaps || comprehensiveAnalysis.domainAgnosticGaps.summary.total === 0) && (
+            <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-400 rounded-xl p-6 text-center">
+              <div className="text-4xl mb-3">✅</div>
+              <h3 className="text-lg font-bold text-green-800 dark:text-green-200 mb-2">
+                Workflow Looks Great!
+              </h3>
+              <p className="text-green-700 dark:text-green-300">
+                No gaps or duplicates detected. Your workflow is well-structured!
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
@@ -384,79 +531,21 @@ const UserWorkflowInterface: React.FC = () => {
             </div>
           )}
 
+          {/* AI Ordering Comparison Panel */}
+          {orderingIssue && (
+            <AIOrderingComparisonPanel
+              orderingIssue={orderingIssue}
+              onApplySuggestedOrder={handleApplySuggestedOrder}
+              onKeepOriginal={handleKeepOriginalOrder}
+            />
+          )}
+
           {/* Workflow Analysis */}
           {workflow.length > 0 && (
             <WorkflowAnalysisPanel workflow={workflow} sopText={sopText} />
           )}
         </div>
       </div>
-
-      {/* Orange Warning Boxes - Gaps & Duplicates (Show below visualization) */}
-      {workflow.length > 0 && comprehensiveAnalysis && (
-        <div className="mt-6 space-y-4">
-          {/* Gap Detection Orange Box */}
-          {comprehensiveAnalysis.gaps?.internalGaps?.missingSteps && comprehensiveAnalysis.gaps.internalGaps.missingSteps.length > 0 && (
-            <GapDetectionPanel
-              missingSteps={comprehensiveAnalysis.gaps.internalGaps.missingSteps}
-              onAddStep={(stepText) => {
-                // Add the missing step to the workflow
-                const newStep = {
-                  id: `added-step-${Date.now()}`,
-                  text: stepText,
-                  type: 'process',
-                  name: stepText
-                };
-                const newSteps = [...workflow, newStep];
-                setWorkflow(newSteps);
-                setSopText(newSteps.map((s, i) => `${i + 1}. ${s.text}`).join('\n'));
-                // Re-run analysis after adding
-                setTimeout(() => runAnalysis(), 500);
-              }}
-            />
-          )}
-
-          {/* Duplicate Detection Orange Box */}
-          {comprehensiveAnalysis.duplicates && comprehensiveAnalysis.duplicates.length > 0 && (
-            <DuplicateDetectionPanel
-              duplicates={comprehensiveAnalysis.duplicates}
-              onMergeSteps={(step1Index, step2Index) => {
-                // Merge the two steps
-                const newSteps = [...workflow];
-                const mergedText = `${newSteps[step1Index].text} AND ${newSteps[step2Index].text}`;
-                newSteps[step1Index] = {
-                  ...newSteps[step1Index],
-                  text: mergedText,
-                  name: mergedText
-                };
-                newSteps.splice(step2Index, 1);
-                setWorkflow(newSteps);
-                setSopText(newSteps.map((s, i) => `${i + 1}. ${s.text}`).join('\n'));
-                // Re-run analysis after merging
-                setTimeout(() => runAnalysis(), 500);
-              }}
-              onKeepBoth={(index) => {
-                // Just acknowledge - keep both steps
-                console.log('User chose to keep both steps for duplicate pair', index);
-              }}
-            />
-          )}
-
-          {/* Show message if analysis ran but no issues found */}
-          {comprehensiveAnalysis && 
-           (!comprehensiveAnalysis.gaps?.internalGaps?.missingSteps || comprehensiveAnalysis.gaps.internalGaps.missingSteps.length === 0) &&
-           (!comprehensiveAnalysis.duplicates || comprehensiveAnalysis.duplicates.length === 0) && (
-            <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-400 rounded-xl p-6 text-center">
-              <div className="text-4xl mb-3">✅</div>
-              <h3 className="text-lg font-bold text-green-800 dark:text-green-200 mb-2">
-                Workflow Looks Great!
-              </h3>
-              <p className="text-green-700 dark:text-green-300 text-sm">
-                No gaps or duplicates detected. Your workflow is well-structured!
-              </p>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Template Selector Modal */}
       {showTemplateSelector && (
