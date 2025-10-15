@@ -1,316 +1,364 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Check, Star, ArrowRight, Zap, Users, Building } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { grantSOPAccess, trackUserJourney } from '../services/subscriptionService';
+/**
+ * Pricing Page Component
+ * Updated with new BYOK (Bring Your Own Key) model
+ */
 
-interface PricingTier {
-  name: string;
-  price: number;
-  period: string;
-  description: string;
-  features: string[];
-  popular?: boolean;
-  icon: React.ReactNode;
-  color: string;
-}
+import React, { useState } from 'react';
+import { Crown, Users, Shield, CheckCircle, ArrowRight, Key, Zap } from 'lucide-react';
 
 const Pricing: React.FC = () => {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState<string | null>(null);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
-  const pricingTiers: PricingTier[] = [
+  const tiers = [
     {
+      id: 'free',
       name: 'Free',
-      price: 0,
+      price: '$0',
       period: 'forever',
-      description: 'Perfect for individuals exploring workflow optimization',
-      icon: <Star className="w-6 h-6" />,
-      color: 'from-gray-400 to-gray-500',
+      description: 'Perfect for exploring the platform',
+      icon: Shield,
+      color: 'gray',
       features: [
-        '3 Workflows',
-        'Basic Templates',
-        '1 User',
-        'Community Support',
-        'Core Features'
-      ]
+        '3 workflows',
+        'Basic parsing (no AI)',
+        'Manual workflow creation',
+        'Interactive flowchart',
+        'Basic exports (JSON, CSV, Text, Markdown)',
+        '10 pre-built templates',
+        'Community support'
+      ],
+      limitations: [
+        'No AI features',
+        'Limited to 3 workflows',
+        'No premium exports'
+      ],
+      cta: 'Get Started Free',
+      ctaLink: '/signup',
+      popular: false
     },
     {
-      name: 'Starter',
-      price: 29,
-      period: 'month',
-      description: 'Perfect for small teams getting started with workflow optimization',
-      icon: <Zap className="w-6 h-6" />,
-      color: 'from-blue-500 to-blue-600',
+      id: 'pro',
+      name: 'Pro',
+      price: '$19',
+      period: billingCycle === 'yearly' ? 'year' : 'month',
+      description: 'For regular users who want AI features',
+      icon: Crown,
+      color: 'blue',
       features: [
-        '50 Workflows',
-        'Basic SOP Management',
-        'Workflow Templates',
-        'Team Collaboration (up to 5 users)',
-        'Email Support',
-        'Basic Analytics'
-      ]
-    },
-    {
-      name: 'Professional',
-      price: 79,
-      period: 'month',
-      description: 'Advanced features for growing teams and complex workflows',
-      icon: <Users className="w-6 h-6" />,
-      color: 'from-purple-500 to-purple-600',
+        'Unlimited workflows',
+        'AI parsing (uses your OpenAI API key)',
+        'AI analysis (comprehensive gap detection)',
+        'AI chat (workflow assistance)',
+        'All export formats (Mermaid, Draw.io, Notion)',
+        'Interactive flowchart with decision nodes',
+        'Advanced workflow analytics',
+        'Priority email support',
+        'API access',
+        'Workflow templates library'
+      ],
+      limitations: [],
+      cta: 'Start Pro Trial',
+      ctaLink: '/signup?plan=pro',
       popular: true,
-      features: [
-        'Unlimited Workflows',
-        'Advanced SOP Management',
-        'Workflow Automation',
-        'Team Collaboration (up to 25 users)',
-        'Priority Support',
-        'Advanced Analytics',
-        'Custom Workflows',
-        'API Access'
-      ]
+      savings: billingCycle === 'yearly' ? 'Save 20%' : null
     },
     {
+      id: 'enterprise',
       name: 'Enterprise',
-      price: 199,
-      period: 'month',
-      description: 'Complete solution for large organizations with custom needs',
-      icon: <Building className="w-6 h-6" />,
-      color: 'from-orange-500 to-orange-600',
+      price: '$49',
+      period: billingCycle === 'yearly' ? 'year' : 'month',
+      description: 'For teams and organizations',
+      icon: Users,
+      color: 'purple',
       features: [
-        'Everything in Professional',
-        'Unlimited Workflows',
-        'Unlimited Users',
-        'White-label Solution',
-        'Dedicated Support',
-        'Advanced Security',
-        'Custom Integrations',
-        'SLA Guarantee'
-      ]
+        'Everything in Pro',
+        'Team collaboration (up to 10 users)',
+        'Shared workflow library',
+        'Advanced analytics dashboard',
+        'White-label option (remove Kovari branding)',
+        'Custom integrations (API webhooks)',
+        'Priority phone support',
+        'Dedicated account manager',
+        'Custom onboarding',
+        'SLA guarantees'
+      ],
+      limitations: [],
+      cta: 'Contact Sales',
+      ctaLink: '/contact',
+      popular: false,
+      savings: billingCycle === 'yearly' ? 'Save 20%' : null
     }
   ];
 
-  const handleSubscribe = async (tier: string) => {
-    // Free tier - just sign up!
-    if (tier === 'free') {
-      if (!user) {
-        window.location.href = '/signup';
-      } else {
-        window.location.href = '/dashboard';
-      }
-      return;
-    }
-
-    // Paid tiers
-    if (!user) {
-      // Redirect to signup if not authenticated
-      window.location.href = '/signup';
-      return;
-    }
-
-    setLoading(tier);
-
-    try {
-      // Track subscription attempt
-      await trackUserJourney(user.id, 'subscription_attempted', 'opscentral', {
-        tier: tier,
-        timestamp: new Date().toISOString()
-      });
-
-      // In a real implementation, you'd integrate with Stripe or another payment processor
-      // For now, we'll simulate granting access
-      const success = await grantSOPAccess(user.id, tier);
-      
-      if (success) {
-        // Track successful subscription
-        await trackUserJourney(user.id, 'subscription_completed', 'opscentral', {
-          tier: tier,
-          timestamp: new Date().toISOString()
-        });
-
-        // Show success message and redirect
-        alert(`Welcome to ${tier}! Your SOP platform access has been granted.`);
-        window.location.href = '/dashboard';
-      } else {
-        alert('There was an error processing your subscription. Please try again.');
-      }
-    } catch (error) {
-      console.error('Subscription error:', error);
-      alert('There was an error processing your subscription. Please try again.');
-    } finally {
-      setLoading(null);
+  const getButtonClass = (tier: typeof tiers[0]) => {
+    const baseClass = 'w-full py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2';
+    
+    switch (tier.color) {
+      case 'blue':
+        return `${baseClass} bg-blue-600 hover:bg-blue-700 text-white`;
+      case 'purple':
+        return `${baseClass} bg-purple-600 hover:bg-purple-700 text-white`;
+      default:
+        return `${baseClass} bg-gray-600 hover:bg-gray-700 text-white`;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 pt-20">
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-            Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-600">Plan</span>
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
-            Unlock the power of centralized workflow management. Start your journey to optimized operations today.
-          </p>
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span>30-day money-back guarantee</span>
-            <span>•</span>
-            <span>Cancel anytime</span>
-            <span>•</span>
-            <span>No setup fees</span>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Simple, Transparent Pricing
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
+              Bring your own OpenAI API key and pay only for what you use. 
+              No markup, no hidden costs, no surprises.
+            </p>
+            
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                Monthly
+              </span>
+              <button
+                onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
+                className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700 transition-colors"
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    billingCycle === 'yearly' ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+              <span className={`text-sm font-medium ${billingCycle === 'yearly' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                Yearly
+                <span className="ml-1 text-green-600 dark:text-green-400 text-xs">(Save 20%)</span>
+              </span>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
-          {pricingTiers.map((tier) => (
-            <div
-              key={tier.name}
-              className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-2 ${
-                tier.popular 
-                  ? 'border-primary-500 scale-105' 
-                  : 'border-gray-200 dark:border-gray-700'
-              }`}
-            >
-              {tier.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-primary-600 to-accent-600 text-white px-4 py-2 rounded-full text-sm font-semibold">
-                    Most Popular
+      {/* Pricing Cards */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {tiers.map((tier) => {
+            const Icon = tier.icon;
+            const yearlyPrice = billingCycle === 'yearly' ? Math.round(parseInt(tier.price.slice(1)) * 12 * 0.8) : null;
+            
+            return (
+              <div
+                key={tier.id}
+                className={`relative rounded-2xl border-2 p-8 transition-all ${
+                  tier.popular
+                    ? 'border-blue-500 shadow-xl scale-105 bg-white dark:bg-gray-800'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
+                }`}
+              >
+                {tier.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-blue-500 text-white text-sm font-semibold px-4 py-2 rounded-full">
+                      Most Popular
+                    </span>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="p-8">
-                {/* Tier Header */}
                 <div className="text-center mb-8">
-                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-r ${tier.color} text-white mb-4`}>
-                    {tier.icon}
+                  <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${
+                    tier.color === 'blue' 
+                      ? 'bg-blue-100 dark:bg-blue-900' 
+                      : tier.color === 'purple'
+                      ? 'bg-purple-100 dark:bg-purple-900'
+                      : 'bg-gray-100 dark:bg-gray-700'
+                  }`}>
+                    <Icon className={`w-8 h-8 ${
+                      tier.color === 'blue'
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : tier.color === 'purple'
+                        ? 'text-purple-600 dark:text-purple-400'
+                        : 'text-gray-600 dark:text-gray-400'
+                    }`} />
                   </div>
+                  
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                     {tier.name}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  
+                  <div className="mb-4">
+                    <span className="text-5xl font-bold text-gray-900 dark:text-white">
+                      {billingCycle === 'yearly' && yearlyPrice ? `$${yearlyPrice}` : tier.price}
+                    </span>
+                    <span className="text-gray-600 dark:text-gray-400 ml-2">
+                      /{tier.period}
+                    </span>
+                  </div>
+                  
+                  {tier.savings && (
+                    <div className="inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm font-semibold px-3 py-1 rounded-full mb-4">
+                      {tier.savings}
+                    </div>
+                  )}
+                  
+                  <p className="text-gray-600 dark:text-gray-400">
                     {tier.description}
                   </p>
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                      ${tier.price}
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-400">/{tier.period}</span>
-                  </div>
                 </div>
 
                 {/* Features */}
-                <ul className="space-y-4 mb-8">
-                  {tier.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700 dark:text-gray-300">{feature}</span>
-                    </li>
+                <div className="space-y-4 mb-8">
+                  {tier.features.map((feature, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-700 dark:text-gray-300">
+                        {feature}
+                      </span>
+                    </div>
                   ))}
-                </ul>
+                </div>
+
+                {/* Limitations */}
+                {tier.limitations.length > 0 && (
+                  <div className="mb-8">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
+                      Limitations:
+                    </h4>
+                    <ul className="space-y-2">
+                      {tier.limitations.map((limitation, index) => (
+                        <li key={index} className="flex items-start gap-3 text-gray-600 dark:text-gray-400">
+                          <span className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0" />
+                          {limitation}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 {/* CTA Button */}
-                <button
-                  onClick={() => handleSubscribe(tier.name.toLowerCase())}
-                  disabled={loading === tier.name.toLowerCase()}
-                  className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-2 ${
-                    tier.popular
-                      ? 'bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white shadow-lg hover:shadow-xl'
-                      : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100'
-                  } ${
-                    loading === tier.name.toLowerCase()
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:transform hover:-translate-y-1'
-                  }`}
+                <a
+                  href={tier.ctaLink}
+                  className={getButtonClass(tier)}
                 >
-                  {loading === tier.name.toLowerCase() ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Processing...
-                    </>
-                  ) : tier.name === 'Free' ? (
-                    <>
-                      {user ? 'Current Plan' : 'Start Free'}
-                      <ArrowRight className="w-5 h-5" />
-                    </>
-                  ) : (
-                    <>
-                      Get Started
-                      <ArrowRight className="w-5 h-5" />
-                    </>
-                  )}
-                </button>
+                  {tier.cta}
+                  <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+      </div>
 
-        {/* FAQ Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
-            Frequently Asked Questions
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                Can I change my plan later?
+      {/* AI Costs Section */}
+      <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              Transparent AI Costs
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+              With Pro and Enterprise plans, you use your own OpenAI API key. 
+              You pay OpenAI directly - we never markup AI costs.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-blue-50 dark:bg-blue-950 rounded-xl p-6 text-center">
+              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                AI Parse
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately.
+              <p className="text-2xl font-bold text-blue-800 dark:text-blue-200 mb-2">
+                ~$0.02
+              </p>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                per workflow
               </p>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                Is there a free trial?
+
+            <div className="bg-purple-50 dark:bg-purple-950 rounded-xl p-6 text-center">
+              <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Key className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-2">
+                AI Analysis
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                We offer a 30-day money-back guarantee. If you're not satisfied, we'll refund your payment.
+              <p className="text-2xl font-bold text-purple-800 dark:text-purple-200 mb-2">
+                ~$0.01
+              </p>
+              <p className="text-sm text-purple-700 dark:text-purple-300">
+                per analysis
               </p>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                What payment methods do you accept?
+
+            <div className="bg-green-50 dark:bg-green-950 rounded-xl p-6 text-center">
+              <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">
+                AI Chat
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                We accept all major credit cards, PayPal, and bank transfers for Enterprise plans.
+              <p className="text-2xl font-bold text-green-800 dark:text-green-200 mb-2">
+                ~$0.005
               </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                Do you offer custom pricing?
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Yes! Contact our sales team for custom Enterprise solutions and volume discounts.
+              <p className="text-sm text-green-700 dark:text-green-300">
+                per message
               </p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* CTA Section */}
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Ready to Transform Your Workflows?
+      {/* FAQ Section */}
+      <div className="bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">
+            Frequently Asked Questions
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-            Join thousands of product managers who've revolutionized their operations.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/book"
-              className="px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              Book a Demo
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              to="/contact"
-              className="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              Contact Sales
-            </Link>
+          
+          <div className="space-y-8">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                Why do I need my own OpenAI API key?
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                This allows us to offer transparent pricing with no markup on AI costs. 
+                You pay OpenAI directly for AI usage, plus our simple platform fee. 
+                This saves you money compared to competitors who markup AI costs.
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                Is my API key secure?
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Yes! Your API key is stored locally in your browser and never transmitted to our servers. 
+                You can remove it anytime, and we never see or store your key.
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                What happens if I exceed my OpenAI usage limits?
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                You'll need to add credits to your OpenAI account or upgrade your OpenAI plan. 
+                This gives you full control over your AI usage and costs.
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                Can I cancel anytime?
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Yes! You can cancel your subscription anytime. You'll keep access until the end of your billing period, 
+                and you can always use the Free plan with basic features.
+              </p>
+            </div>
           </div>
         </div>
       </div>

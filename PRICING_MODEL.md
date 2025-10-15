@@ -1,19 +1,19 @@
-# 💰 Kovari Pricing Model - Credits System
+# 💰 Kovari Pricing Model - Bring Your Own API Key
 
-**Last Updated:** October 13, 2025  
-**Model Type:** Hybrid (Free Tier + Pay-Per-Use Credits + Optional Subscription)
+**Last Updated:** January 15, 2025  
+**Model Type:** Simple Platform Fee + User's Own OpenAI API Key
 
 ---
 
 ## 📊 EXECUTIVE SUMMARY
 
-Instead of traditional monthly subscriptions, Kovari uses a **flexible credits-based system** that allows users to only pay for what they use. This model is ideal for workflow creation tools because:
+Kovari uses a **simple platform fee model** where users bring their own OpenAI API key. This approach is ideal for workflow creation tools because:
 
-- ✅ Workflows aren't created daily (sporadic usage)
-- ✅ Lower barrier to entry ($10 vs $500/month)
-- ✅ Fair pricing - heavy users pay more, light users pay less
-- ✅ No commitment - users can stop anytime
-- ✅ Higher conversion rate (easy to try)
+- ✅ **Zero AI costs for Kovari** - users pay OpenAI directly
+- ✅ **Transparent pricing** - no markup on AI usage
+- ✅ **Simple business model** - just platform access fees
+- ✅ **Competitive advantage** - cheaper than competitors who markup AI
+- ✅ **User control** - they manage their own AI usage and costs
 
 ---
 
@@ -22,7 +22,7 @@ Instead of traditional monthly subscriptions, Kovari uses a **flexible credits-b
 ### **Tier 1: Free Forever** 🆓
 
 **Cost:** $0  
-**Credits:** 0 (use features that don't require AI)  
+**OpenAI API Key:** Not required  
 **Includes:**
 - ✅ 3 workflows (stored)
 - ✅ Basic parsing (regex-based, no AI)
@@ -44,103 +44,88 @@ Instead of traditional monthly subscriptions, Kovari uses a **flexible credits-b
 
 ---
 
-### **Tier 2: Pay-Per-Use Credits** 💎 (RECOMMENDED)
+### **Tier 2: Pro** 💎
 
-**Cost:** Buy credits as needed  
-**No monthly commitment**
-
-#### **Credit Packages:**
-
-| Package | Credits | Price | Cost per Credit | Bonus | Best For |
-|---------|---------|-------|-----------------|-------|----------|
-| **Starter** | 100 | $10 | $0.10 | 0% | Trying it out |
-| **Popular** 🔥 | 600 | $50 | $0.083 | 20% | Regular users |
-| **Best Value** ⭐ | 1,500 | $100 | $0.067 | 50% | Power users |
-| **Enterprise** | 5,000 | $300 | $0.06 | 66% | Teams |
-
-**Credits never expire!** (or 12-month expiration option)
-
-#### **Credit Costs:**
-
-| Feature | Credits | Why It Costs |
-|---------|---------|--------------|
-| **AI Parse with OpenAI** | 5 | Uses GPT-4o-mini API |
-| **AI Analysis (comprehensive)** | 2 | Runs 5 AI algorithms |
-| **AI Chat message** | 1 | Each message to/from AI |
-| **Premium Export (Mermaid)** | 1 | Advanced formatting |
-| **Premium Export (Draw.io)** | 1 | Advanced formatting |
-| **Premium Export (Notion)** | 1 | Advanced formatting |
-| **Save additional workflow** | 2 | Beyond free 3 workflows |
-
-#### **Free Features (No Credits):**
-
-- ✅ Basic parsing (regex)
-- ✅ Manual workflow creation
-- ✅ Viewing saved workflows
-- ✅ Drag-and-drop editing
-- ✅ Basic exports (JSON, CSV, Text, Markdown)
-- ✅ Templates
-- ✅ Interactive flowchart
-- ✅ Manual gap detection (non-AI)
-
-**Perfect for:** Most users - pay only when you need AI features
-
----
-
-### **Tier 3: Pro Subscription** 🚀 (OPTIONAL)
-
-**Cost:** $97/month  
-**Credits:** Unlimited (included)  
-**Best for users creating 15+ workflows/month**
+**Cost:** $19/month  
+**OpenAI API Key:** Required (user provides their own)  
+**Best for users creating 5+ workflows/month**
 
 **Includes Everything:**
-- ✅ Unlimited AI parsing
-- ✅ Unlimited AI analysis
-- ✅ Unlimited AI chat
 - ✅ Unlimited workflows
-- ✅ All export formats
-- ✅ Priority support
+- ✅ AI parsing (uses your OpenAI API key)
+- ✅ AI analysis (comprehensive gap detection)
+- ✅ AI chat (workflow assistance)
+- ✅ All export formats (Mermaid, Draw.io, Notion)
+- ✅ Interactive flowchart with decision nodes
+- ✅ Advanced workflow analytics
+- ✅ Priority email support
 - ✅ API access
-- ✅ Team collaboration (up to 5 users)
-- ✅ Advanced analytics
-- ✅ White-label option (remove Kovari branding)
+- ✅ Workflow templates library
 
-**Perfect for:** Companies using it regularly, teams
+**AI Costs (Paid Directly to OpenAI):**
+- AI Parse: ~$0.02 per workflow
+- AI Analysis: ~$0.01 per analysis
+- AI Chat: ~$0.005 per message
+
+**Perfect for:** Regular users who want AI features without markup
 
 ---
 
-## 📊 COMPARISON: Why Credits Beat Monthly
+### **Tier 3: Enterprise** 🚀
+
+**Cost:** $49/month  
+**OpenAI API Key:** Required (user provides their own)  
+**Best for teams and organizations**
+
+**Includes Everything in Pro, Plus:**
+- ✅ Team collaboration (up to 10 users)
+- ✅ Shared workflow library
+- ✅ Advanced analytics dashboard
+- ✅ White-label option (remove Kovari branding)
+- ✅ Custom integrations (API webhooks)
+- ✅ Priority phone support
+- ✅ Dedicated account manager
+- ✅ Custom onboarding
+- ✅ SLA guarantees
+
+**AI Costs (Paid Directly to OpenAI):**
+- Same as Pro tier - users pay OpenAI directly
+
+**Perfect for:** Teams, agencies, and organizations
+
+---
+
+## 📊 COMPARISON: Why BYOK (Bring Your Own Key) Beats Competitors
 
 ### **Scenario 1: Occasional User**
 **Profile:** Creates 5 workflows in Month 1, then 1-2/month after
 
 | Model | Month 1 | Month 2 | Month 3 | Total |
 |-------|---------|---------|---------|-------|
-| **Monthly ($500)** | $500 | $500 | $500 | **$1,500** |
-| **Credits** | $50 | $10 | $10 | **$70** |
+| **Competitor ($500/month)** | $500 | $500 | $500 | **$1,500** |
+| **Kovari Pro ($19/month)** | $19 + $0.10 AI | $19 + $0.02 AI | $19 + $0.02 AI | **$57.14** |
 
-**Savings:** $1,430 (95% less!)
+**Savings:** $1,442.86 (96% less!)
 
 ### **Scenario 2: Regular User**
 **Profile:** Creates 10 workflows/month consistently
 
 | Model | Month 1 | Month 2 | Month 3 | Total |
 |-------|---------|---------|---------|-------|
-| **Monthly ($500)** | $500 | $500 | $500 | **$1,500** |
-| **Credits** | $100 | $100 | $100 | **$300** |
-| **Pro Sub ($97)** | $97 | $97 | $97 | **$291** |
+| **Competitor ($500/month)** | $500 | $500 | $500 | **$1,500** |
+| **Kovari Pro ($19/month)** | $19 + $0.20 AI | $19 + $0.20 AI | $19 + $0.20 AI | **$57.60** |
 
-**Best choice:** Pro Subscription
+**Savings:** $1,442.40 (96% less!)
 
-### **Scenario 3: Enterprise User**
-**Profile:** 50 workflows in Month 1 (onboarding), then 5/month
+### **Scenario 3: Enterprise Team**
+**Profile:** 5 team members, 20 workflows/month total
 
 | Model | Month 1 | Month 2-12 | Total Year |
 |-------|---------|------------|------------|
-| **Monthly ($2,000)** | $2,000 | $22,000 | **$24,000** |
-| **Credits** | $500 | $550 | **$1,050** |
+| **Competitor ($2,000/month)** | $2,000 | $22,000 | **$24,000** |
+| **Kovari Enterprise ($49/month)** | $49 + $0.40 AI | $588 + $4.80 AI | **$642.20** |
 
-**Savings:** $22,950!
+**Savings:** $23,357.80!
 
 ---
 
@@ -148,40 +133,52 @@ Instead of traditional monthly subscriptions, Kovari uses a **flexible credits-b
 
 ### **For You (Kovari):**
 
-1. **Lower Customer Acquisition Cost**
-   - "Try for $10" converts better than "Subscribe for $500"
-   - Free tier brings people in
+1. **Zero AI Costs**
+   - No OpenAI bills on your end
+   - Users pay OpenAI directly
+   - Predictable platform costs only
 
-2. **Higher Revenue Potential**
-   - Credits model: Users who would never pay $500/month might buy $10-50 in credits
-   - Capture the "occasional user" market
+2. **Simple Business Model**
+   - Just monthly platform fees
+   - No complex credit management
+   - No payment processing for AI usage
 
-3. **Predictable Costs**
-   - You pay OpenAI per API call
-   - You charge per API call
-   - Perfect cost alignment!
+3. **Competitive Advantage**
+   - 96% cheaper than competitors
+   - Transparent pricing (no AI markup)
+   - Users control their AI costs
 
-4. **Upsell Path**
-   - Free → Credits ($10-100) → Subscription ($97)
-   - Natural progression
+4. **Higher Conversion**
+   - $19/month vs $500/month
+   - "Bring your own API key" is appealing
+   - No commitment to expensive AI usage
 
-5. **Fair Pricing**
-   - Heavy users pay more (fair!)
-   - Light users don't subsidize heavy users
+5. **Scalable Revenue**
+   - Platform fees scale with users
+   - No per-usage costs to manage
+   - Clear profit margins
 
 ### **For Customers:**
 
-1. **No Commitment**
-   - Buy $10 of credits to test
-   - No cancellation hassles
+1. **Transparent Costs**
+   - See exactly what OpenAI charges
+   - No hidden AI markups
+   - Pay only for platform access
 
-2. **Predictable Costs**
-   - See exactly what you're using
-   - No surprise bills
+2. **Control AI Usage**
+   - Manage their own OpenAI spending
+   - Set their own usage limits
+   - No surprise AI bills
 
-3. **Fair Value**
-   - Only pay for AI features
-   - Free features stay free
+3. **Better Value**
+   - 96% savings vs competitors
+   - Keep their existing OpenAI relationship
+   - Simple monthly platform fee
+
+4. **No Commitment**
+   - Cancel anytime (just platform fee)
+   - Keep their OpenAI API key
+   - No vendor lock-in
 
 ---
 

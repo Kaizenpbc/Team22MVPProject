@@ -5,7 +5,7 @@ import WorkflowVisualization from './WorkflowVisualization';
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 pt-20">
       {/* Abstract Background - Hero Section Only */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Flowing Gradient Shapes */}
@@ -33,12 +33,18 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
-        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500">
-          Kovari
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-900 dark:text-white">
+          Transform Documents Into
+          <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500">
+            Intelligent Workflows
+          </span>
         </h1>
         
-        <p className="text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-4 max-w-4xl mx-auto leading-relaxed">
-          Workflow Intelligence by{' '}
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+          by{' '}
+          <span className="text-primary-600 dark:text-primary-400 font-semibold">Kovari</span>
+          {' '}• Powered by{' '}
           <a 
             href="https://kpbc.ca" 
             target="_blank" 
@@ -49,13 +55,24 @@ const Hero = () => {
           </a>
         </p>
         
-        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-4 max-w-3xl mx-auto">
-          AI-powered workflow intelligence that extracts, structures, and automates processes from any document — creating clarity, efficiency, and compliance across industries.
+        <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto font-medium">
+          Turn any document into intelligent, automated workflows.
         </p>
         
-        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-500 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed">
-          Kovari transforms unstructured and structured data into actionable workflows, delivering clarity, efficiency, and compliance across industries. From government agencies to enterprises, Kovari adapts to your processes and continuously improves them.
-        </p>
+        <div className="flex flex-wrap justify-center gap-6 mb-8 sm:mb-12 text-sm text-gray-500 dark:text-gray-400">
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+            No coding required
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+            Works with any document
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+            Enterprise-ready
+          </span>
+        </div>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link 

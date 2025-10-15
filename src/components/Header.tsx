@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Workflow, LogOut, User as UserIcon, Coins } from 'lucide-react';
+import { Menu, X, Workflow, LogOut, User as UserIcon, Coins, Settings as SettingsIcon } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '../contexts/AuthContext';
+import { APIKeyStatusCompact } from './common/APIKeyStatus';
 import { getCreditBalance } from '../services/creditsService';
 
 const Header = () => {
@@ -56,6 +57,9 @@ const Header = () => {
             <ThemeToggle />
             {user ? (
               <>
+                    {/* API Key Status */}
+                    <APIKeyStatusCompact onClick={() => navigate('/settings')} />
+                    
                     <Link
                       to="/credits"
                       className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-all shadow-md hover:shadow-lg"
@@ -64,6 +68,15 @@ const Header = () => {
                       <Coins className="w-4 h-4" />
                       <span className="font-bold">{credits}</span>
                     </Link>
+                    
+                    <Link
+                      to="/settings"
+                      className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors"
+                      title="Settings"
+                    >
+                      <SettingsIcon className="w-5 h-5" />
+                    </Link>
+                    
                     <Link
                       to="/dashboard"
                       className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors"
@@ -71,6 +84,7 @@ const Header = () => {
                       <UserIcon className="w-5 h-5" />
                       <span>{user.user_metadata?.full_name || user.email}</span>
                     </Link>
+                    
                     <button
                       onClick={handleSignOut}
                       className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 font-medium transition-colors"

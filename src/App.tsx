@@ -8,6 +8,7 @@ import SignUp from './pages/SignUp';
 import About from './pages/About';
 import Book from './pages/Book';
 import Pricing from './pages/Pricing';
+import Settings from './pages/Settings';
 import Dashboard from './pages/Dashboard';
 import WorkflowCreator from './pages/WorkflowCreator';
 import Credits from './pages/Credits';
@@ -50,6 +51,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/book" element={<Book />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/workflow-creator" element={<WorkflowCreator />} />
         <Route path="/credits" element={<Credits />} />
