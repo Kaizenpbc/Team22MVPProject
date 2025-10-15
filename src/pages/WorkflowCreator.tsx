@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { isAdmin } from '../utils/roleUtils';
 import UserWorkflowInterface from '../components/workflow/interfaces/UserWorkflowInterface';
 import AdminWorkflowInterface from '../components/workflow/interfaces/AdminWorkflowInterface';
 
@@ -11,9 +12,8 @@ const WorkflowCreator: React.FC = () => {
   const { user } = useAuth();
   const [isAdminMode, setIsAdminMode] = useState(false);
 
-  // Check if user has admin privileges
-  // TODO: Add actual admin check from user metadata or database
-  const isAdmin = user?.user_metadata?.role === 'admin';
+  // Check if user has admin privileges using utility function
+  const userIsAdmin = isAdmin(user);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -31,7 +31,7 @@ const WorkflowCreator: React.FC = () => {
             </div>
             
             {/* Admin Toggle (if user is admin) */}
-            {isAdmin && (
+            {userIsAdmin && (
               <button
                 onClick={() => setIsAdminMode(!isAdminMode)}
                 className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
@@ -43,7 +43,7 @@ const WorkflowCreator: React.FC = () => {
         </div>
 
         {/* Render appropriate interface */}
-        {isAdminMode && isAdmin ? (
+        {isAdminMode && userIsAdmin ? (
           <AdminWorkflowInterface />
         ) : (
           <UserWorkflowInterface />

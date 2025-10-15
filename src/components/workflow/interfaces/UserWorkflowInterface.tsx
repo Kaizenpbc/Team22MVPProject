@@ -16,6 +16,8 @@ import { WorkflowTemplate } from '../../../utils/workflow/workflowTemplates';
 import { runComprehensiveAnalysis, ComprehensiveAnalysis } from '../../../utils/workflow/comprehensiveWorkflowAnalysis';
 import { WorkflowStep } from '../../../utils/workflow/workflowEditor';
 import { hasEnoughCredits, useAIParse, useAIAnalysis, CREDIT_COSTS, getCreditBalance } from '../../../services/creditsService';
+import FullScreenWorkflow from '../FullScreenWorkflow';
+import StepOptimizationPanel from '../StepOptimizationPanel';
 
 /**
  * User Workflow Interface
@@ -32,6 +34,8 @@ const UserWorkflowInterface: React.FC = () => {
   const [showReorderView, setShowReorderView] = useState(false);
   const [showAnalyticsDashboard, setShowAnalyticsDashboard] = useState(false);
   const [showChatPanel, setShowChatPanel] = useState(false);
+  const [showFullScreen, setShowFullScreen] = useState(false);
+  const [showStepOptimization, setShowStepOptimization] = useState(false);
   const [comprehensiveAnalysis, setComprehensiveAnalysis] = useState<ComprehensiveAnalysis | null>(null);
 
   // Handle file upload with PDF support
@@ -193,36 +197,58 @@ const UserWorkflowInterface: React.FC = () => {
       return;
     }
 
+    console.log('🔍 Starting AI Parse for user:', user.email);
+    console.log('📝 SOP Text length:', sopText.length);
+
     // Check if user has enough credits
-    const hasCredits = await hasEnoughCredits(user.id, CREDIT_COSTS.AI_PARSE);
-    if (!hasCredits) {
-      const balance = await getCreditBalance(user.id);
-      const confirmed = window.confirm(
-        `⚠️ Not Enough Credits!\n\n` +
-        `You have: ${balance.credits} credits\n` +
-        `AI Parse costs: ${CREDIT_COSTS.AI_PARSE} credits\n\n` +
-        `Would you like to buy more credits?`
-      );
-      if (confirmed) {
-        window.location.href = '/credits';
+    try {
+      const hasCredits = await hasEnoughCredits(user.id, CREDIT_COSTS.AI_PARSE);
+      console.log('💰 Credit check result:', hasCredits);
+      
+      if (!hasCredits) {
+        const balance = await getCreditBalance(user.id);
+        console.log('💳 User balance:', balance);
+        const confirmed = window.confirm(
+          `⚠️ Not Enough Credits!\n\n` +
+          `You have: ${balance.credits} credits\n` +
+          `AI Parse costs: ${CREDIT_COSTS.AI_PARSE} credits\n\n` +
+          `Would you like to buy more credits?`
+        );
+        if (confirmed) {
+          window.location.href = '/credits';
+        }
+        return;
       }
+    } catch (error) {
+      console.error('❌ Credit check failed:', error);
+      alert(`Credit check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       return;
     }
 
     setIsParsingWithAI(true);
     
     try {
+      console.log('💳 Deducting credits...');
       // DEDUCT CREDITS FIRST
       const deducted = await useAIParse(user.id, 'Workflow');
+      console.log('✅ Credits deducted:', deducted);
+      
       if (!deducted) {
         throw new Error('Failed to deduct credits');
       }
 
+      console.log('🤖 Starting AI parsing...');
       // Then run AI parsing
       const { parseWithAIFallback } = await import('../../../utils/workflow/aiWorkflowParser');
       const aiParsedSteps = await parseWithAIFallback(sopText);
-      
+      console.log('✨ AI parsing completed:', aiParsedSteps.length, 'steps');
+
       setWorkflow(aiParsedSteps);
+      
+      // Show step optimization panel after parsing
+      setTimeout(() => {
+        setShowStepOptimization(true);
+      }, 1000);
       
       // Auto-run analysis after AI parsing  
       setTimeout(() => runAnalysis(), 500);
@@ -235,12 +261,16 @@ const UserWorkflowInterface: React.FC = () => {
             `Credits used: ${CREDIT_COSTS.AI_PARSE}\n` +
             `Remaining balance: ${newBalance.credits} credits`);
     } catch (error) {
-      console.error('Error parsing with AI:', error);
+      console.error('❌ AI parsing failed:', error);
+      
+      // Show detailed error message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
       if (error instanceof Error && error.message === 'NOT_ENOUGH_CREDITS') {
         alert('Not enough credits! Please buy more credits to use AI features.');
         window.location.href = '/credits';
       } else {
-        alert(`AI parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}. Try the basic parser instead.`);
+        alert(`🚨 AI Parsing Failed!\n\nError: ${errorMessage}\n\nTry the basic parser instead or check:\n1. OpenAI API key is configured\n2. You have enough credits\n3. Internet connection is working`);
       }
     } finally {
       setIsParsingWithAI(false);
@@ -267,40 +297,9 @@ const UserWorkflowInterface: React.FC = () => {
             {workflow.length > 0 && (
               <>
                 <button
-                  onClick={() => {
-                    const newWindow = window.open('', '_blank', 'width=1200,height=800');
-                    if (newWindow) {
-                      newWindow.document.write(`
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                          <title>Workflow - Full Screen View</title>
-                          <style>
-                            body { margin: 0; padding: 20px; font-family: Arial, sans-serif; background: #f5f5f5; }
-                            h1 { color: #333; }
-                            .step { padding: 15px; margin: 10px 0; background: white; border-left: 4px solid #2196F3; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-                            .step-number { font-weight: bold; color: #2196F3; font-size: 1.2em; }
-                          </style>
-                        </head>
-                        <body>
-                          <h1>📋 Workflow - Full Screen View</h1>
-                          ${workflow.map((s, i) => `
-                            <div class="step">
-                              <span class="step-number">${i + 1}.</span> ${s.text}
-                            </div>
-                          `).join('')}
-                          <div style="margin-top: 20px; text-align: center; color: #666;">
-                            <button onclick="window.print()" style="padding: 10px 20px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">🖨️ Print</button>
-                            <button onclick="window.close()" style="margin-left: 10px; padding: 10px 20px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
-                          </div>
-                        </body>
-                        </html>
-                      `);
-                      newWindow.document.close();
-                    }
-                  }}
+                  onClick={() => setShowFullScreen(true)}
                   className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors text-sm flex items-center gap-2"
-                  title="Open in new window"
+                  title="Open interactive full screen editor"
                 >
                   🖥️ Full Screen
                 </button>
@@ -399,7 +398,7 @@ const UserWorkflowInterface: React.FC = () => {
           {comprehensiveAnalysis.gaps?.internalGaps?.missingSteps && comprehensiveAnalysis.gaps.internalGaps.missingSteps.length > 0 && (
             <GapDetectionPanel
               missingSteps={comprehensiveAnalysis.gaps.internalGaps.missingSteps}
-              onAddStep={(stepText, index) => {
+              onAddStep={(stepText) => {
                 // Add the missing step to the workflow
                 const newStep = {
                   id: `added-step-${Date.now()}`,
@@ -515,6 +514,30 @@ const UserWorkflowInterface: React.FC = () => {
             />
           </div>
         </div>
+      )}
+
+      {/* Full Screen Workflow Editor */}
+      {showFullScreen && (
+        <FullScreenWorkflow
+          initialWorkflow={workflow}
+          onClose={() => setShowFullScreen(false)}
+          onSave={(updatedWorkflow) => {
+            setWorkflow(updatedWorkflow);
+            setShowFullScreen(false);
+          }}
+        />
+      )}
+
+      {/* Step Optimization Panel */}
+      {showStepOptimization && (
+        <StepOptimizationPanel
+          workflow={workflow}
+          onApplySplits={(newWorkflow) => {
+            setWorkflow(newWorkflow);
+            setShowStepOptimization(false);
+          }}
+          onClose={() => setShowStepOptimization(false)}
+        />
       )}
     </div>
   );

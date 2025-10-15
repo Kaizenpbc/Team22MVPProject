@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Workflow, LogOut, User as UserIcon, Coins } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,6 +9,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [credits, setCredits] = React.useState<number>(0);
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     if (user) {
@@ -24,6 +25,7 @@ const Header = () => {
 
   const handleSignOut = async () => {
     await signOut();
+    navigate('/'); // Navigate to home page after sign out
   };
 
   return (

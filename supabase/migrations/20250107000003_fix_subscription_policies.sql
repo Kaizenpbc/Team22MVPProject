@@ -1,7 +1,9 @@
 -- Fix RLS policies to allow users to create their own subscriptions
 
--- Drop existing restrictive policies
+-- Drop ALL existing policies first
 DROP POLICY IF EXISTS "Service role can manage all subscriptions" ON public.user_subscriptions;
+DROP POLICY IF EXISTS "Users can create their own subscriptions" ON public.user_subscriptions;
+DROP POLICY IF EXISTS "Users can update their own subscriptions" ON public.user_subscriptions;
 
 -- Allow users to insert their own subscriptions
 CREATE POLICY "Users can create their own subscriptions" 
@@ -21,8 +23,9 @@ CREATE POLICY "Service role can manage all subscriptions"
     FOR ALL 
     USING (auth.role() = 'service_role');
 
--- Drop existing restrictive policies for user_profiles
+-- Drop existing policies for user_profiles
 DROP POLICY IF EXISTS "Service role can manage all profiles" ON public.user_profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.user_profiles;
 
 -- Allow users to insert their own profile (in case it doesn't exist)
 CREATE POLICY "Users can insert their own profile" 
@@ -35,6 +38,9 @@ CREATE POLICY "Service role can manage all profiles"
     ON public.user_profiles 
     FOR ALL 
     USING (auth.role() = 'service_role');
+
+-- Drop existing policies for user_journey
+DROP POLICY IF EXISTS "Users can create their own journey events" ON public.user_journey;
 
 -- Allow users to insert journey events
 CREATE POLICY "Users can create their own journey events" 

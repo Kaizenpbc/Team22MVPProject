@@ -15,11 +15,7 @@ interface AIParseResponse {
  * Parse SOP text using OpenAI for intelligent step extraction
  */
 export const parseWithAI = async (sopText: string): Promise<AIParseResponse> => {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  
-  if (!apiKey) {
-    throw new Error('OpenAI API key not found. Please add VITE_OPENAI_API_KEY to your .env file.');
-  }
+  console.log('🤖 Using OpenAI proxy to avoid CORS issues...');
 
   try {
     const prompt = `You are an expert at analyzing Standard Operating Procedures (SOPs) and converting them into structured workflow steps.
@@ -56,37 +52,27 @@ Rules:
 - Provide confidence score (0-1) for extraction quality
 - Suggest improvements if workflow has issues`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an expert workflow analyst. Return only valid JSON.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 2000,
-        response_format: { type: "json_object" }
-      })
+    // Use OpenAI proxy to avoid CORS issues
+    const { callOpenAIProxy } = await import('../../services/openaiProxy');
+    
+    const response = await callOpenAIProxy({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an expert workflow analyst. Return only valid JSON.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 2000,
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
-    }
-
-    const data = await response.json();
-    const aiResponse = JSON.parse(data.choices[0].message.content);
+    // Response is already parsed from proxy
+    const aiResponse = JSON.parse(response.choices[0].message.content);
 
     // Add IDs to steps
     const stepsWithIds: WorkflowStep[] = aiResponse.steps.map((step: any, index: number) => ({

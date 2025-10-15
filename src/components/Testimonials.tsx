@@ -6,32 +6,25 @@ const Testimonials = () => {
 
   const testimonials = [
     {
-      review: "Kovari has saved us countless hours by streamlining our processes. What used to take days now happens in hours.",
-      name: "Sarah Mitchell",
-      title: "Senior Product Manager",
-      company: "TechFlow Solutions",
+      review: "Kovari's AI transformed our 200-page SOP manual into actionable workflows in minutes. What used to take weeks of analysis now happens instantly. The accuracy is remarkable - 95% of extracted workflows were immediately usable.",
+      name: "Dr. Maria Santos",
+      title: "Chief Medical Officer",
+      company: "MetroHealth Systems",
       image: "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face"
     },
     {
-      review: "Our team collaboration has greatly improved thanks to the real-time updates. Everyone stays in sync effortlessly.",
-      name: "James Rodriguez",
-      title: "Head of Product Operations",
-      company: "InnovateCorp",
+      review: "We had years of process documentation scattered across emails, PDFs, and Word docs. Kovari's AI intelligently parsed everything and created standardized workflows that actually match how our teams work. It's like having an AI consultant who never sleeps.",
+      name: "David Fung",
+      title: "Operations Director",
+      company: "FinTech Solutions",
       image: "https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face"
     },
     {
-      review: "The platform's customisation options have allowed us to perfectly tailor our workflows to our specific needs. It's like having a bespoke solution.",
-      name: "Emily Chen",
-      title: "Director of Product Management",
-      company: "Streamline Dynamics",
+      review: "The credit system is brilliant - we only pay for AI processing when we need it. Our compliance team used Kovari to extract workflows from regulatory documents, saving 80% of manual review time. The AI understands industry terminology better than our junior analysts.",
+      name: "Jennifer Walsh",
+      title: "Compliance Manager",
+      company: "Global Manufacturing Corp",
       image: "https://images.pexels.com/photos/1181424/pexels-photo-1181424.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face"
-    },
-    {
-      review: "Using this system has significantly boosted our productivity and efficiency. Our team delivers results faster than ever before.",
-      name: "Michael Thompson",
-      title: "VP of Product Strategy",
-      company: "Efficiency Partners",
-      image: "https://images.pexels.com/photos/1043473/pexels-photo-1043473.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face"
     }
   ];
 

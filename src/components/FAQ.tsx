@@ -6,24 +6,28 @@ const FAQ = () => {
 
   const faqs = [
     {
-      question: "How does Kovari integrate with existing product management tools?",
-      answer: "Kovari seamlessly integrates with popular tools like Jira, Trello, Asana, and Slack through our robust API connections. Our platform acts as a centralised hub that pulls data from your existing tools whilst maintaining your current workflows, ensuring a smooth transition without disrupting your team's productivity."
+      question: "How does Kovari's AI extract workflows from unstructured documents?",
+      answer: "Our advanced AI uses natural language processing and machine learning to analyze documents, emails, and forms. It identifies key processes, decision points, and action items, then structures them into clear, executable workflows. The AI learns from your industry patterns and continuously improves its extraction accuracy."
     },
     {
-      question: "Can I customise workflows to match my team's specific processes?",
-      answer: "Absolutely! Our platform is built with flexibility in mind. You can create custom workflow templates, define approval processes, set automated triggers, and tailor every aspect of the system to match your team's unique requirements. The drag-and-drop interface makes customisation intuitive and quick."
+      question: "What types of documents can Kovari process and transform?",
+      answer: "Kovari can process virtually any text-based document including SOPs, policy manuals, email chains, PDFs, Word docs, spreadsheets, and even handwritten notes. Our AI recognizes various formats and languages, extracting actionable workflows regardless of how the information was originally documented."
     },
     {
-      question: "What kind of real-time updates and notifications does the platform provide?",
-      answer: "Kovari provides instant notifications for task updates, approval requests, deadline reminders, and process completions. You can customise notification preferences, choose delivery methods (email, in-app, mobile push), and set up smart alerts that only notify relevant team members based on their roles and responsibilities."
+      question: "How accurate is the AI workflow extraction, and can I edit the results?",
+      answer: "Our AI achieves 90%+ accuracy on first extraction, with accuracy improving through machine learning. All generated workflows are fully editable - you can modify steps, add conditions, rearrange processes, and customize to your exact needs. Think of AI as your intelligent starting point."
     },
     {
-      question: "Is there a learning curve for new users, and what support is available?",
-      answer: "We've designed Kovari to be intuitive for product managers. Most users are productive within their first day. We provide comprehensive onboarding, video tutorials, live training sessions, and 24/7 customer support. Our dedicated customer success team ensures smooth adoption and ongoing optimisation of your workflows."
+      question: "Does Kovari work across different industries and compliance requirements?",
+      answer: "Yes! Kovari adapts to any industry - from healthcare and finance to manufacturing and government. Our AI understands industry-specific terminology and compliance frameworks. It can generate workflows that meet HIPAA, SOX, ISO, and other regulatory requirements while maintaining your organization's unique processes."
     },
     {
-      question: "How secure is my data, and what compliance standards do you meet?",
-      answer: "Security is our top priority. We employ enterprise-grade encryption, regular security audits, and comply with GDPR, SOC 2 Type II, and ISO 27001 standards. Your data is stored in secure, geographically distributed data centres with automatic backups and disaster recovery protocols to ensure 99.9% uptime and complete data protection."
+      question: "How does the credit system work for AI features?",
+      answer: "Kovari uses a credit-based system for AI processing. Basic workflow creation is free, while AI parsing costs credits based on document complexity. Credits can be purchased in packages, and we offer generous free tiers. Enterprise plans include unlimited AI processing. Think of it as pay-per-intelligence."
+    },
+    {
+      question: "Can Kovari integrate with existing business systems and tools?",
+      answer: "Absolutely! Kovari integrates with popular platforms like Slack, Microsoft Teams, SharePoint, Google Workspace, and enterprise systems via APIs. Generated workflows can be exported to project management tools, shared via email, or embedded in your existing documentation systems."
     }
   ];
 

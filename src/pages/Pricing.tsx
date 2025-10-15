@@ -37,7 +37,7 @@ const Pricing: React.FC = () => {
     },
     {
       name: 'Starter',
-      price: 500,
+      price: 29,
       period: 'month',
       description: 'Perfect for small teams getting started with workflow optimization',
       icon: <Zap className="w-6 h-6" />,
@@ -53,7 +53,7 @@ const Pricing: React.FC = () => {
     },
     {
       name: 'Professional',
-      price: 1000,
+      price: 79,
       period: 'month',
       description: 'Advanced features for growing teams and complex workflows',
       icon: <Users className="w-6 h-6" />,
@@ -72,7 +72,7 @@ const Pricing: React.FC = () => {
     },
     {
       name: 'Enterprise',
-      price: 2000,
+      price: 199,
       period: 'month',
       description: 'Complete solution for large organizations with custom needs',
       icon: <Building className="w-6 h-6" />,
@@ -196,7 +196,7 @@ const Pricing: React.FC = () => {
                   </p>
                   <div className="mb-6">
                     <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                      £{tier.price}
+                      ${tier.price}
                     </span>
                     <span className="text-gray-600 dark:text-gray-400">/{tier.period}</span>
                   </div>

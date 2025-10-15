@@ -33,22 +33,34 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-accent-600">
+        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500">
           Kovari
         </h1>
         
         <p className="text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-4 max-w-4xl mx-auto leading-relaxed">
-          Workflow Intelligence by Kaizen
+          Workflow Intelligence by{' '}
+          <a 
+            href="https://kpbc.ca" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-secondary-500 hover:text-secondary-600 underline hover:no-underline transition-colors font-medium"
+          >
+            Kaizen
+          </a>
         </p>
         
-        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-8 sm:mb-12 max-w-3xl mx-auto">
+        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-4 max-w-3xl mx-auto">
           AI-powered workflow intelligence that extracts, structures, and automates processes from any document — creating clarity, efficiency, and compliance across industries.
+        </p>
+        
+        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-500 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed">
+          Kovari transforms unstructured and structured data into actionable workflows, delivering clarity, efficiency, and compliance across industries. From government agencies to enterprises, Kovari adapts to your processes and continuously improves them.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link 
             to="/book"
-            className="group inline-flex px-6 sm:px-8 py-3 sm:py-4 bg-accent-600 hover:bg-accent-700 text-white font-semibold rounded-lg transition-all duration-300 items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1 min-h-[44px] text-base sm:text-lg"
+            className="group inline-flex px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-primary-500 to-secondary-500 hover:from-primary-600 hover:to-secondary-600 text-white font-bold rounded-2xl transition-all duration-300 items-center gap-3 shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 min-h-[56px] text-lg sm:text-xl"
           >
             Book Your Demo Today
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

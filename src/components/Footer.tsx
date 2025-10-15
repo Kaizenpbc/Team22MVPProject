@@ -17,8 +17,7 @@ const Footer = () => {
               <span className="text-xl font-bold text-primary-600 dark:text-primary-400">Kovari</span>
             </div>
             <p className="text-sm sm:text-base text-gray-700 dark:text-white mb-6 max-w-md">
-              The centralised hub that transforms how product managers handle internal workflows, 
-              SOP management, and real-time updates.
+              AI-powered workflow intelligence that extracts, structures, and automates processes from any document.
             </p>
             <div className="flex flex-wrap gap-3 sm:gap-4">
               <a 
@@ -89,17 +88,17 @@ const Footer = () => {
             <ul className="space-y-3 text-xs">
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                <a href="mailto:hello@opscentral.com" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors break-all">
-                  hello@opscentral.com
+                <a href="mailto:sales@kpbc.ca" className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors break-all">
+                  sales@kpbc.ca
                 </a>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                <span className="text-gray-600 dark:text-gray-300">+44 20 7123 4567</span>
+                <span className="text-gray-600 dark:text-gray-300">(416) 723 2571</span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-gray-600 dark:text-gray-300 mt-0.5" />
-                <span className="text-gray-600 dark:text-gray-300">London, United Kingdom</span>
+                <span className="text-gray-600 dark:text-gray-300">Toronto, Canada</span>
               </li>
             </ul>
           </div>
