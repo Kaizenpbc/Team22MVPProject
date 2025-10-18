@@ -158,6 +158,22 @@ const UserWorkflowInterface: React.FC = () => {
       return;
     }
 
+    // Check if user has an API key configured (BYOK model)
+    const { hasAPIKey } = await import('../../../services/apiKeyService');
+    if (!hasAPIKey()) {
+      const confirmed = window.confirm(
+        '🔑 OpenAI API Key Required\n\n' +
+        'AI Analysis requires your own OpenAI API key.\n\n' +
+        'This is part of our BYOK (Bring Your Own Key) pricing model.\n' +
+        'You only pay OpenAI directly for what you use (~$0.01 per analysis).\n\n' +
+        'Would you like to configure your API key now?'
+      );
+      if (confirmed) {
+        window.location.href = '/settings';
+      }
+      return;
+    }
+
     // Check if user has enough credits
     const hasCredits = await hasEnoughCredits(user.id, CREDIT_COSTS.AI_ANALYSIS);
     if (!hasCredits) {
@@ -258,6 +274,22 @@ const UserWorkflowInterface: React.FC = () => {
 
     if (!user) {
       alert('Please sign in to use AI features!');
+      return;
+    }
+
+    // Check if user has an API key configured (BYOK model)
+    const { hasAPIKey } = await import('../../../services/apiKeyService');
+    if (!hasAPIKey()) {
+      const confirmed = window.confirm(
+        '🔑 OpenAI API Key Required\n\n' +
+        'AI features require your own OpenAI API key.\n\n' +
+        'This is part of our BYOK (Bring Your Own Key) pricing model.\n' +
+        'You only pay OpenAI directly for what you use (~$0.02 per workflow).\n\n' +
+        'Would you like to configure your API key now?'
+      );
+      if (confirmed) {
+        window.location.href = '/settings';
+      }
       return;
     }
 

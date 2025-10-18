@@ -12,15 +12,23 @@ serve(async (req) => {
   }
 
   try {
-    // Get OpenAI API key from environment
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
-    
-    if (!openaiApiKey) {
-      throw new Error('OpenAI API key not configured in Supabase secrets')
-    }
-
     // Get request body
     const requestBody = await req.json()
+    
+    // Get OpenAI API key - prioritize user's key, fallback to server key
+    let openaiApiKey = requestBody.userApiKey || req.headers.get('x-openai-key')
+    
+    // Fallback to server key for backward compatibility or admin features
+    if (!openaiApiKey) {
+      openaiApiKey = Deno.env.get('OPENAI_API_KEY')
+    }
+    
+    if (!openaiApiKey) {
+      throw new Error('OpenAI API key required. Please configure your API key in Settings.')
+    }
+    
+    // Remove userApiKey from request body before sending to OpenAI
+    const { userApiKey, ...openaiRequest } = requestBody
     
     // Forward request to OpenAI
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -29,7 +37,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(openaiRequest),
     })
 
     if (!openaiResponse.ok) {

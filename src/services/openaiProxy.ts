@@ -23,12 +23,24 @@ export interface OpenAIProxyResponse {
 
 /**
  * Call OpenAI API through Supabase Edge Function (proxy)
+ * Now supports user's own API key (BYOK model)
  */
-export const callOpenAIProxy = async (request: OpenAIProxyRequest): Promise<OpenAIProxyResponse> => {
+export const callOpenAIProxy = async (
+  request: OpenAIProxyRequest, 
+  userApiKey?: string
+): Promise<OpenAIProxyResponse> => {
   const { supabase } = await import('../lib/supabase');
   
+  // Get user's API key from localStorage if not provided
+  if (!userApiKey) {
+    userApiKey = localStorage.getItem('openai_api_key') || undefined;
+  }
+  
   const { data, error } = await supabase.functions.invoke('openai-proxy', {
-    body: request
+    body: {
+      ...request,
+      userApiKey // Pass user's API key to Edge Function
+    }
   });
 
   if (error) {
