@@ -16,6 +16,8 @@ import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Cookies from './pages/Cookies';
 import AdminUsers from './pages/AdminUsers';
+import AdminManagement from './pages/AdminManagement';
+import TierManagement from './pages/TierManagement';
 import Footer from './components/Footer';
 
 function App() {
@@ -60,6 +62,8 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/cookies" element={<Cookies />} />
         <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin-management" element={<AdminManagement />} />
+        <Route path="/tier-management" element={<TierManagement />} />
       </Routes>
       <Footer />
       {showAssistant && <AssistantLauncher onClick={handleAssistantClick} />}

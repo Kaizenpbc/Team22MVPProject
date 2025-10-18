@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { isAdmin } from '../utils/roleUtils';
 import { supabase } from '../lib/supabase';
-import { ArrowLeft, Users, Mail, Shield, Coins, Calendar, UserX, UserCheck, Trash2 } from 'lucide-react';
+import { auditService } from '../services/auditService';
+import { creditsAdminService } from '../services/creditsAdminService';
+import { ArrowLeft, Users, Mail, Shield, Coins, Calendar, UserX, UserCheck, Trash2, Settings, Plus, Minus } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -27,7 +29,10 @@ const AdminUsers: React.FC = () => {
   const [emailSubject, setEmailSubject] = useState('');
   const [emailMessage, setEmailMessage] = useState('');
   const [emailType, setEmailType] = useState('general');
-  const [userEmails, setUserEmails] = useState<{[key: string]: string}>({});
+  const [showCreditModal, setShowCreditModal] = useState(false);
+  const [creditUser, setCreditUser] = useState<UserProfile | null>(null);
+  const [creditAmount, setCreditAmount] = useState(0);
+  const [creditReason, setCreditReason] = useState('');
 
   useEffect(() => {
     // Check if user is admin
@@ -37,65 +42,20 @@ const AdminUsers: React.FC = () => {
     }
 
     fetchUsers();
-    fetchUserEmails();
   }, [user, navigate]);
-
-  const fetchUserEmails = async () => {
-    try {
-      console.log('🔍 Attempting to get email data...');
-      
-      // Since the admin function isn't working due to database issues,
-      // let's try a different approach - use the populate function to get email data
-      console.log('🔧 Using populate function to get email data...');
-      
-      const { data: populateData, error: populateError } = await supabase.rpc('debug_populate_user_profiles');
-      
-      if (!populateError && populateData) {
-        console.log('✅ Populate function returned:', populateData);
-        
-        // For now, let's create a simple mapping with placeholder emails
-        // based on the user names we can see
-        const emailMap: {[key: string]: string} = {};
-        
-        // Get current users and create email mappings based on common patterns
-        const { data: userData } = await supabase
-          .from('user_profiles')
-          .select('id, full_name')
-          .limit(50);
-          
-        if (userData) {
-          userData.forEach((user: any) => {
-            if (user.id && user.full_name) {
-              // Create email based on name pattern
-              const emailName = user.full_name.toLowerCase().replace(/\s+/g, '.');
-              emailMap[user.id] = `${emailName}@example.com`;
-            }
-          });
-          
-          setUserEmails(emailMap);
-          console.log('📧 Created email mapping with patterns:', emailMap);
-        }
-      } else {
-        console.log('⚠️ Could not get email data:', populateError?.message);
-      }
-    } catch (error) {
-      console.log('⚠️ Error fetching email data:', error);
-    }
-  };
 
   const fetchUsers = async () => {
     try {
       console.log('🔍 Fetching users from database...');
+      setUsers([]); // Clear existing users
       
-      // Since we know there are 10 users, let's try a different approach
-      // Let's check if there's a view or if we need to populate user_profiles
-      
-      // Get users from user_profiles table (now includes email data)
-      console.log('🔍 Fetching users from user_profiles table...');
+      // Get users from user_profiles table (now includes email data from migration)
+      console.log('🔍 Fetching users from user_profiles table with email data...');
       
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
+        .neq('subscription_status', 'deleted') // Don't show deleted users
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -105,12 +65,12 @@ const AdminUsers: React.FC = () => {
       }
       
       console.log('✅ Successfully fetched users from user_profiles:', data?.length || 0, 'users');
-      console.log('📧 Sample user email:', data?.[0]?.email);
+      console.log('📧 First user data:', data?.[0]);
+      console.log('📧 First user email:', data?.[0]?.email);
+      
       setUsers(data || []);
     } catch (error) {
       console.error('❌ Error fetching users:', error);
-      
-      // Show a helpful error message to user
       setUsers([]);
     } finally {
       setLoading(false);
@@ -119,10 +79,10 @@ const AdminUsers: React.FC = () => {
 
   const populateAllUsers = async () => {
     try {
-      console.log('🔧 Attempting to populate all users...');
+      console.log('🔧 Attempting to populate all users with email data...');
       
-      // Try to run the debug populate function for more detailed output
-      const { data, error } = await supabase.rpc('debug_populate_user_profiles');
+      // Use the new function that includes email data
+      const { data, error } = await supabase.rpc('populate_user_profiles_with_email');
       
       if (error) {
         console.error('❌ Error populating users:', error);
@@ -130,14 +90,14 @@ const AdminUsers: React.FC = () => {
         return;
       }
       
-      console.log('✅ Users populated successfully:', data);
+      console.log('✅ Users populated successfully with emails:', data);
       
       // Since email data isn't being populated properly, let's try to get it manually
       console.log('🔍 Attempting to get email data manually...');
       
       // Try to get email data from auth.users using a simple approach
       try {
-        const { data: authData, error: authError } = await supabase.auth.getUser();
+        const { data: authData } = await supabase.auth.getUser();
         console.log('📧 Current user email data:', authData?.user?.email);
         
         // For now, let's just refresh and show the helpful messages
@@ -174,6 +134,9 @@ const AdminUsers: React.FC = () => {
       
       alert('User suspended successfully: ' + data);
       
+      // Log the suspension action
+      await auditService.logUserSuspension(userId, userEmail);
+      
       // Send suspension notification email
       try {
         await supabase.rpc('send_user_notification', {
@@ -183,6 +146,9 @@ const AdminUsers: React.FC = () => {
           notification_type: 'suspension'
         });
         console.log('✅ Suspension notification email sent');
+        
+        // Log the email sent
+        await auditService.logEmailSent(userEmail, 'Account Suspended', 'suspension');
       } catch (emailError) {
         console.log('⚠️ Failed to send suspension email:', emailError);
       }
@@ -208,6 +174,9 @@ const AdminUsers: React.FC = () => {
       
       alert('User reactivated successfully: ' + data);
       
+      // Log the reactivation action
+      await auditService.logUserActivation(userId, userEmail);
+      
       // Send reactivation notification email
       try {
         await supabase.rpc('send_user_notification', {
@@ -217,6 +186,9 @@ const AdminUsers: React.FC = () => {
           notification_type: 'reactivation'
         });
         console.log('✅ Reactivation notification email sent');
+        
+        // Log the email sent
+        await auditService.logEmailSent(userEmail, 'Account Reactivated', 'reactivation');
       } catch (emailError) {
         console.log('⚠️ Failed to send reactivation email:', emailError);
       }
@@ -241,6 +213,10 @@ const AdminUsers: React.FC = () => {
       }
       
       alert('User deleted successfully: ' + data);
+      
+      // Log the deletion action
+      await auditService.logUserDeletion(userId, userEmail);
+      
       await fetchUsers(); // Refresh the list
     } catch (error) {
       console.error('❌ Unexpected error:', error);
@@ -266,6 +242,10 @@ const AdminUsers: React.FC = () => {
       }
       
       alert('Email sent successfully: ' + data);
+      
+      // Log the email sent
+      await auditService.logEmailSent(selectedUser.email, emailSubject, emailType);
+      
       setShowEmailModal(false);
       setEmailSubject('');
       setEmailMessage('');
@@ -293,12 +273,50 @@ const AdminUsers: React.FC = () => {
       }
       
       alert('Bulk email sent successfully: ' + data);
+      
+      // Log the bulk email sent
+      await auditService.logBulkEmailSent(users.length, emailSubject, emailType);
+      
       setShowEmailModal(false);
       setEmailSubject('');
       setEmailMessage('');
     } catch (error) {
       console.error('❌ Unexpected error:', error);
       alert('Unexpected error occurred. Please check console.');
+    }
+  };
+
+  const openCreditModal = (user: UserProfile) => {
+    setCreditUser(user);
+    setCreditAmount(0);
+    setCreditReason('');
+    setShowCreditModal(true);
+  };
+
+  const adjustCredits = async () => {
+    if (!creditUser || creditAmount === 0) {
+      alert('Please enter a credit amount');
+      return;
+    }
+
+    if (!creditReason.trim()) {
+      alert('Please provide a reason for the adjustment');
+      return;
+    }
+
+    try {
+      await creditsAdminService.adjustUserCredits(
+        creditUser.id,
+        creditAmount,
+        creditReason
+      );
+
+      alert(`Credits adjusted successfully: ${creditAmount > 0 ? '+' : ''}${creditAmount} credits`);
+      setShowCreditModal(false);
+      await fetchUsers();
+    } catch (error) {
+      console.error('Error adjusting credits:', error);
+      alert('Error adjusting credits. Please check console.');
     }
   };
 
@@ -375,11 +393,13 @@ const AdminUsers: React.FC = () => {
                   ⚠️ Only 1 user found, but there should be 10+ users
                 </div>
               )}
-              {users.length > 0 && Object.keys(userEmails).length === 0 && (
-                <div className="text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg border border-blue-200 dark:border-blue-800">
-                  📧 Loading email addresses from auth.users table...
-                </div>
-              )}
+              <button
+                onClick={() => navigate('/admin-management')}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium"
+              >
+                <Settings className="w-4 h-4 inline mr-2" />
+                Manage Admins
+              </button>
               <button
                 onClick={() => openEmailModal(null)}
                 className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
@@ -457,14 +477,14 @@ const AdminUsers: React.FC = () => {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">User Directory</h2>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: 'calc(100vh - 400px)' }}>
             <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sticky left-0 bg-gray-50 dark:bg-gray-700 z-20">
                     User
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider sticky left-0 bg-gray-50 dark:bg-gray-700 z-20" style={{ left: '250px' }}>
                     Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -479,7 +499,7 @@ const AdminUsers: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Joined
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" style={{ minWidth: '200px' }}>
                     Actions
                   </th>
                 </tr>
@@ -487,7 +507,7 @@ const AdminUsers: React.FC = () => {
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {users.map((userProfile) => (
                   <tr key={userProfile.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap sticky left-0 bg-white dark:bg-gray-800 z-10 group-hover:bg-gray-50 dark:group-hover:bg-gray-700 shadow-[2px_0_4px_rgba(0,0,0,0.05)]">
                       <div className="flex items-center">
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -495,16 +515,16 @@ const AdminUsers: React.FC = () => {
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
                             <Mail className="w-3 h-3" />
-                            {userProfile.email || userEmails[userProfile.id] || (
+                            {userProfile.email || (
                               <span className="text-gray-400 italic">
-                                Loading email...
+                                Email not available
                               </span>
                             )}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap sticky bg-white dark:bg-gray-800 z-10 group-hover:bg-gray-50 dark:group-hover:bg-gray-700 shadow-[2px_0_4px_rgba(0,0,0,0.05)]" style={{ left: '250px' }}>
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         userProfile.role === 'admin'
                           ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
@@ -537,11 +557,11 @@ const AdminUsers: React.FC = () => {
                         {new Date(userProfile.created_at).toLocaleDateString()}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      <div className="flex items-center gap-2">
+                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-1 flex-wrap">
                         {userProfile.subscription_status === 'suspended' ? (
                           <button
-                            onClick={() => reactivateUser(userProfile.id, userProfile.email || userEmails[userProfile.id] || userProfile.full_name || 'Unknown User')}
+                            onClick={() => reactivateUser(userProfile.id, userProfile.email || userProfile.full_name || 'Unknown User')}
                             className="p-1 text-green-600 hover:text-green-800 hover:bg-green-50 rounded transition-colors"
                             title="Reactivate user"
                           >
@@ -549,13 +569,20 @@ const AdminUsers: React.FC = () => {
                           </button>
                         ) : (
                           <button
-                            onClick={() => suspendUser(userProfile.id, userProfile.email || userEmails[userProfile.id] || userProfile.full_name || 'Unknown User')}
+                            onClick={() => suspendUser(userProfile.id, userProfile.email || userProfile.full_name || 'Unknown User')}
                             className="p-1 text-orange-600 hover:text-orange-800 hover:bg-orange-50 rounded transition-colors"
                             title="Suspend user"
                           >
                             <UserX className="w-4 h-4" />
                           </button>
                         )}
+                        <button
+                          onClick={() => openCreditModal(userProfile)}
+                          className="p-1 text-purple-600 hover:text-purple-800 hover:bg-purple-50 rounded transition-colors"
+                          title="Adjust credits"
+                        >
+                          <Coins className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => openEmailModal(userProfile)}
                           className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
@@ -564,7 +591,7 @@ const AdminUsers: React.FC = () => {
                           <Mail className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => deleteUser(userProfile.id, userProfile.email || userEmails[userProfile.id] || userProfile.full_name || 'Unknown User')}
+                          onClick={() => deleteUser(userProfile.id, userProfile.email || userProfile.full_name || 'Unknown User')}
                           className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
                           title="Delete user"
                         >
@@ -664,6 +691,132 @@ const AdminUsers: React.FC = () => {
               >
                 Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Credit Adjustment Modal */}
+      {showCreditModal && creditUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Coins className="w-5 h-5 text-purple-600" />
+                Adjust Credits for {creditUser.full_name || creditUser.email}
+              </h3>
+              <button
+                onClick={() => setShowCreditModal(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Current Credits Display */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Current Credits</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {creditUser.credits || 0} credits
+                </p>
+              </div>
+
+              {/* Credit Amount */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Credit Adjustment
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCreditAmount(Math.max(-creditUser.credits, creditAmount - 100))}
+                    className="p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <input
+                    type="number"
+                    value={creditAmount}
+                    onChange={(e) => setCreditAmount(parseInt(e.target.value) || 0)}
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center"
+                    placeholder="0"
+                  />
+                  <button
+                    onClick={() => setCreditAmount(creditAmount + 100)}
+                    className="p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => setCreditAmount(-100)}
+                    className="flex-1 px-2 py-1 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded text-xs hover:bg-red-200 dark:hover:bg-red-900/40"
+                  >
+                    -100
+                  </button>
+                  <button
+                    onClick={() => setCreditAmount(100)}
+                    className="flex-1 px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded text-xs hover:bg-green-200 dark:hover:bg-green-900/40"
+                  >
+                    +100
+                  </button>
+                  <button
+                    onClick={() => setCreditAmount(500)}
+                    className="flex-1 px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded text-xs hover:bg-green-200 dark:hover:bg-green-900/40"
+                  >
+                    +500
+                  </button>
+                  <button
+                    onClick={() => setCreditAmount(1000)}
+                    className="flex-1 px-2 py-1 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded text-xs hover:bg-green-200 dark:hover:bg-green-900/40"
+                  >
+                    +1000
+                  </button>
+                </div>
+                {creditAmount !== 0 && (
+                  <p className={`text-sm mt-2 ${creditAmount > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    New balance: {(creditUser.credits || 0) + creditAmount} credits
+                  </p>
+                )}
+              </div>
+
+              {/* Reason */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Reason for Adjustment <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={creditReason}
+                  onChange={(e) => setCreditReason(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="e.g., Bonus credits for beta testing, Refund for service issue, etc."
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={adjustCredits}
+                disabled={creditAmount === 0 || !creditReason.trim()}
+                className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg transition-colors font-medium"
+              >
+                {creditAmount > 0 ? '➕ Add Credits' : '➖ Remove Credits'}
+              </button>
+              <button
+                onClick={() => setShowCreditModal(false)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+
+            {/* Info Notice */}
+            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                ℹ️ All credit adjustments are logged and tracked with full audit trail.
+              </p>
             </div>
           </div>
         </div>

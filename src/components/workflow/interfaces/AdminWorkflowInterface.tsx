@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users } from 'lucide-react';
+import { Users, Shield } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import UserWorkflowInterface from './UserWorkflowInterface';
 
@@ -31,14 +31,24 @@ const AdminWorkflowInterface: React.FC = () => {
               You have access to advanced workflow features and analytics
             </p>
           </div>
-          <button
-            onClick={() => navigate('/settings', { state: { activeTab: 'admin-users' } })}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
-            title="View all registered users"
-          >
-            <Users className="w-4 h-4" />
-            View All Users
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/admin-management')}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium"
+              title="Manage admin tier and permissions"
+            >
+              <Shield className="w-4 h-4" />
+              Admin Tier Management
+            </button>
+            <button
+              onClick={() => navigate('/settings', { state: { activeTab: 'admin-users' } })}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
+              title="View all registered users"
+            >
+              <Users className="w-4 h-4" />
+              View All Users
+            </button>
+          </div>
         </div>
       </div>
 
