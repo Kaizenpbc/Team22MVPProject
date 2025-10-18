@@ -15,6 +15,7 @@ import Credits from './pages/Credits';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Cookies from './pages/Cookies';
+import AdminUsers from './pages/AdminUsers';
 import Footer from './components/Footer';
 
 function App() {
@@ -58,6 +59,7 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/cookies" element={<Cookies />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
       </Routes>
       <Footer />
       {showAssistant && <AssistantLauncher onClick={handleAssistantClick} />}

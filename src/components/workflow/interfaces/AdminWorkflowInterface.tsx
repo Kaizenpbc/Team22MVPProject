@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Users } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import UserWorkflowInterface from './UserWorkflowInterface';
 
@@ -8,6 +10,7 @@ import UserWorkflowInterface from './UserWorkflowInterface';
  */
 const AdminWorkflowInterface: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [advancedSettings, setAdvancedSettings] = useState({
     aiModel: 'gpt-4',
     analysisDepth: 'comprehensive',
@@ -18,13 +21,25 @@ const AdminWorkflowInterface: React.FC = () => {
     <div className="space-y-6">
       {/* Admin Header */}
       <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
-        <p className="text-purple-900 dark:text-purple-100">
-          ⚙️ <span className="font-semibold">{user?.email}</span> 
-          <span className="ml-2 text-purple-600 dark:text-purple-400 font-bold">(Administrator)</span>
-        </p>
-        <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">
-          You have access to advanced workflow features and analytics
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-purple-900 dark:text-purple-100">
+              ⚙️ <span className="font-semibold">{user?.email}</span> 
+              <span className="ml-2 text-purple-600 dark:text-purple-400 font-bold">(Administrator)</span>
+            </p>
+            <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">
+              You have access to advanced workflow features and analytics
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/settings', { state: { activeTab: 'admin-users' } })}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
+            title="View all registered users"
+          >
+            <Users className="w-4 h-4" />
+            View All Users
+          </button>
+        </div>
       </div>
 
       {/* Advanced Settings Panel */}

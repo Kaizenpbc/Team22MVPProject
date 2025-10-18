@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WorkflowStep } from '../../utils/workflow/workflowEditor';
 import { analyzeWorkflowSteps, StepAnalysis, applyStepSplits } from '../../utils/workflow/stepOptimizer';
-import { Check, X, AlertTriangle, ArrowRight, RotateCcw } from 'lucide-react';
+import { analyzeWorkflowOrdering } from '../../utils/workflow/aiOrderingAnalysis';
+import { Check, X, AlertTriangle, ArrowRight, RotateCcw, List } from 'lucide-react';
 
 interface StepOptimizationPanelProps {
   workflow: WorkflowStep[];
@@ -17,6 +18,19 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
   const [analyses] = useState<StepAnalysis[]>(() => analyzeWorkflowSteps(workflow));
   const [selectedSplits, setSelectedSplits] = useState<{ [stepId: string]: WorkflowStep[] }>({});
   const [showPreview, setShowPreview] = useState(false);
+  const [orderingIssue, setOrderingIssue] = useState<any>(null);
+  const [isAnalyzingOrder, setIsAnalyzingOrder] = useState(true);
+  
+  // Analyze ordering on mount
+  useEffect(() => {
+    const analyzeOrder = async () => {
+      const apiKey = localStorage.getItem('openai_api_key');
+      const ordering = await analyzeWorkflowOrdering(workflow, apiKey);
+      setOrderingIssue(ordering);
+      setIsAnalyzingOrder(false);
+    };
+    analyzeOrder();
+  }, [workflow]);
 
   const complexSteps = analyses.filter(a => a.shouldSplit);
   const totalSteps = workflow.length;
@@ -46,29 +60,30 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
   const previewWorkflow = showPreview ? applyStepSplits(workflow, selectedSplits) : workflow;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 z-50 flex flex-col overflow-hidden">
+      <div className="bg-white h-full w-full flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-6 flex-shrink-0 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">🔧 Optimize Workflow Steps</h2>
-              <p className="text-blue-100 mt-1">
-                Found {complexCount} complex steps that could be split for better clarity
+              <h2 className="text-3xl font-bold">⚡ Optimize Workflow</h2>
+              <p className="text-blue-100 mt-2 text-lg">
+                AI-powered step ordering analysis + complex step detection
               </p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              className="p-3 hover:bg-white/20 rounded-lg transition-colors"
+              title="Close optimizer"
             >
-              <X className="w-6 h-6" />
+              <X className="w-7 h-7" />
             </button>
           </div>
         </div>
 
-        <div className="flex h-[600px]">
+        <div className="flex flex-1 overflow-hidden">
           {/* Left Panel - Step Analysis */}
-          <div className="flex-1 p-6 overflow-y-auto border-r">
+          <div className="flex-1 p-8 overflow-y-auto border-r border-gray-300 bg-gray-50">
             <div className="space-y-4">
               {/* Summary */}
               <div className="bg-blue-50 rounded-lg p-4">
@@ -97,6 +112,67 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
                 </div>
               </div>
 
+              {/* AI Ordering Analysis */}
+              {isAnalyzingOrder ? (
+                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                  <p className="text-sm text-gray-600">Analyzing step order...</p>
+                </div>
+              ) : orderingIssue?.hasIssues ? (
+                <div className="bg-orange-50 border-2 border-orange-400 rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center">
+                      <List className="w-5 h-5 text-orange-600 mr-2" />
+                      <h3 className="font-semibold text-orange-900">⚠️ Ordering Issues Detected</h3>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-orange-800 mb-3">
+                    {orderingIssue.reasoning}
+                  </p>
+                  
+                  <div className="bg-white rounded p-3 mb-3">
+                    <p className="text-xs text-gray-600 mb-2 font-semibold">Suggested Order:</p>
+                    <ol className="text-xs space-y-1">
+                      {orderingIssue.suggestedOrder?.map((step: WorkflowStep, idx: number) => (
+                        <li key={idx} className="text-gray-700">
+                          {idx + 1}. {step.text}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        if (orderingIssue.suggestedOrder) {
+                          onApplySplits(orderingIssue.suggestedOrder);
+                        }
+                      }}
+                      className="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors text-sm font-medium"
+                    >
+                      ✓ Apply Suggested Order
+                    </button>
+                    <button
+                      onClick={() => setOrderingIssue(null)}
+                      className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors text-sm font-medium"
+                    >
+                      Keep Original
+                    </button>
+                  </div>
+                </div>
+              ) : orderingIssue ? (
+                <div className="bg-green-50 border border-green-400 rounded-lg p-4">
+                  <div className="flex items-center text-green-800">
+                    <Check className="w-5 h-5 mr-2" />
+                    <p className="font-medium">Step Order Looks Good!</p>
+                  </div>
+                  <p className="text-sm text-green-700 mt-1">
+                    No ordering issues detected. Steps are in logical sequence.
+                  </p>
+                </div>
+              ) : null}
+
               {/* Complex Steps */}
               {complexSteps.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
@@ -111,13 +187,14 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
                     Complex Steps ({complexCount})
                   </h3>
                   
-                  {complexSteps.map((analysis, index) => {
-                    const isSelected = !!selectedSplits[analysis.step.id];
+                  {complexSteps.map((analysis) => {
+                    const stepId = analysis.step.id || `step-${analysis.step.number}`;
+                    const isSelected = !!selectedSplits[stepId];
                     const splits = analysis.suggestedSplits;
                     
                     return (
                       <div
-                        key={analysis.step.id}
+                        key={stepId}
                         className={`border rounded-lg p-4 transition-all ${
                           isSelected 
                             ? 'border-green-300 bg-green-50' 
@@ -146,7 +223,7 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
                               <p className="text-xs text-gray-500">{analysis.reason}</p>
                             </div>
                             <button
-                              onClick={() => handleToggleSplit(analysis.step.id, splits)}
+                              onClick={() => handleToggleSplit(stepId, splits)}
                               className={`ml-4 px-3 py-1 rounded text-xs font-medium transition-colors ${
                                 isSelected
                                   ? 'bg-green-600 text-white hover:bg-green-700'
@@ -183,7 +260,7 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
           </div>
 
           {/* Right Panel - Preview */}
-          <div className="w-1/3 p-6 bg-gray-50 overflow-y-auto">
+          <div className="w-1/3 p-8 bg-white overflow-y-auto border-l border-gray-300">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-900">Preview</h3>
               <button
@@ -197,9 +274,9 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
 
             {showPreview && (
               <div className="space-y-2">
-                {previewWorkflow.map((step, index) => (
+                {previewWorkflow.map((step) => (
                   <div
-                    key={step.id}
+                    key={step.id || `preview-${step.number}`}
                     className="bg-white rounded border p-3 text-sm"
                   >
                     <div className="flex items-center mb-1">

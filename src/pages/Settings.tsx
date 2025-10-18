@@ -3,16 +3,30 @@
  * Main settings page with API key and subscription management
  */
 
-import React, { useState } from 'react';
-import { Settings as SettingsIcon, Key, Crown, User, Bell } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Settings as SettingsIcon, Key, Crown, User, Bell, Users } from 'lucide-react';
 import { APIKeySettings } from '../components/settings/APIKeySettings';
 import { SubscriptionSettings } from '../components/settings/SubscriptionSettings';
 import { APIKeyStatus } from '../components/common/APIKeyStatus';
+import { useAuth } from '../contexts/AuthContext';
+import { isAdmin } from '../utils/roleUtils';
+import AdminUsers from './AdminUsers';
 
 const Settings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'api-key' | 'subscription' | 'profile' | 'notifications'>('api-key');
+  const { user } = useAuth();
+  const location = useLocation();
+  const userIsAdmin = isAdmin(user);
+  const [activeTab, setActiveTab] = useState<'api-key' | 'subscription' | 'profile' | 'notifications' | 'admin-users'>('api-key');
 
-  const tabs = [
+  // Check if we should open admin-users tab from navigation state
+  useEffect(() => {
+    if (location.state?.activeTab === 'admin-users' && userIsAdmin) {
+      setActiveTab('admin-users');
+    }
+  }, [location.state, userIsAdmin]);
+
+  const baseTabs = [
     {
       id: 'api-key' as const,
       name: 'API Key',
@@ -38,6 +52,15 @@ const Settings: React.FC = () => {
       description: 'Email and notification preferences'
     }
   ];
+
+  const adminTab = {
+    id: 'admin-users' as const,
+    name: 'Manage Users',
+    icon: Users,
+    description: '👑 Admin: View all registered users'
+  };
+
+  const tabs = userIsAdmin ? [...baseTabs, adminTab] : baseTabs;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -232,6 +255,12 @@ const Settings: React.FC = () => {
                     Save Preferences
                   </button>
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'admin-users' && userIsAdmin && (
+              <div className="-m-8">
+                <AdminUsers />
               </div>
             )}
           </div>

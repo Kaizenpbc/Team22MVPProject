@@ -12,11 +12,9 @@ import AnalyticsDashboard from '../analysis/AnalyticsDashboard';
 import WorkflowChatPanel from '../chat/WorkflowChatPanel';
 import GapDetectionPanel from '../analysis/GapDetectionPanel';
 import DuplicateDetectionPanel from '../analysis/DuplicateDetectionPanel';
-import AIOrderingComparisonPanel from '../analysis/AIOrderingComparisonPanel';
 import { DomainAgnosticGapPanel } from '../analysis/DomainAgnosticGapPanel';
 import { WorkflowTemplate } from '../../../utils/workflow/workflowTemplates';
 import { runComprehensiveAnalysis, ComprehensiveAnalysis } from '../../../utils/workflow/comprehensiveWorkflowAnalysis';
-import { analyzeWorkflowOrdering } from '../../../utils/workflow/aiOrderingAnalysis';
 import { WorkflowStep } from '../../../utils/workflow/workflowEditor';
 import { hasEnoughCredits, useAIParse, useAIAnalysis, CREDIT_COSTS, getCreditBalance } from '../../../services/creditsService';
 import FullScreenWorkflow from '../FullScreenWorkflow';
@@ -40,13 +38,65 @@ const UserWorkflowInterface: React.FC = () => {
   const [showFullScreen, setShowFullScreen] = useState(false);
   const [showStepOptimization, setShowStepOptimization] = useState(false);
   const [comprehensiveAnalysis, setComprehensiveAnalysis] = useState<ComprehensiveAnalysis | null>(null);
-  const [orderingIssue, setOrderingIssue] = useState<any>(null);
+  
+  // Resizable panel state
+  const [leftWidth, setLeftWidth] = useState(50); // percentage
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Handle divider drag
+  const handleMouseDown = () => {
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+    const container = document.getElementById('resizable-container');
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+    
+    // Constrain between 20% and 80%
+    if (newLeftWidth >= 20 && newLeftWidth <= 80) {
+      setLeftWidth(newLeftWidth);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Add/remove mouse event listeners for dragging
+  React.useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove as any);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      document.removeEventListener('mousemove', handleMouseMove as any);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'default';
+      document.body.style.userSelect = 'auto';
+    }
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove as any);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'default';
+      document.body.style.userSelect = 'auto';
+    };
+  }, [isDragging]);
 
   // Handle file upload with PDF support
   const handleFileUpload = async (file: File) => {
     if (!file) return;
     
     setUploadedFileName(file.name);
+    
+    // Clear all previous workflow data when loading a new document
+    setWorkflow([]);
+    setComprehensiveAnalysis(null);
     
     try {
       // Check if it's a PDF file
@@ -97,34 +147,6 @@ const UserWorkflowInterface: React.FC = () => {
     setWorkflow(reorderedSteps);
     setSopText(reorderedSteps.map((step, i) => `${i + 1}. ${step.text}`).join('\n'));
     setShowReorderView(false);
-  };
-
-  // Analyze workflow ordering when workflow changes
-  React.useEffect(() => {
-    if (workflow.length > 0) {
-      const analyzeOrdering = async () => {
-        // Get API key from localStorage (same as other AI features)
-        const apiKey = localStorage.getItem('openai_api_key');
-        const ordering = await analyzeWorkflowOrdering(workflow, apiKey);
-        console.log('🧠 Ordering analysis result:', ordering);
-        setOrderingIssue(ordering);
-      };
-      analyzeOrdering();
-    } else {
-      setOrderingIssue(null);
-    }
-  }, [workflow]);
-
-  // Handle applying suggested ordering
-  const handleApplySuggestedOrder = (newSteps: WorkflowStep[]) => {
-    setWorkflow(newSteps);
-    setSopText(newSteps.map((step, i) => `${i + 1}. ${step.text}`).join('\n'));
-    setOrderingIssue(null); // Clear the ordering issue after applying
-  };
-
-  // Handle keeping original order
-  const handleKeepOriginalOrder = () => {
-    setOrderingIssue(null); // Just dismiss the ordering issue
   };
 
   // Run comprehensive analysis (WITH CREDIT CHECK)
@@ -292,11 +314,6 @@ const UserWorkflowInterface: React.FC = () => {
       const numberedText = stepsToText(aiParsedSteps);
       setSopText(numberedText);
       
-      // Show step optimization panel after parsing
-      setTimeout(() => {
-        setShowStepOptimization(true);
-      }, 1000);
-      
       // Auto-run analysis after AI parsing  
       setTimeout(() => runAnalysis(), 500);
       
@@ -371,6 +388,13 @@ const UserWorkflowInterface: React.FC = () => {
                   <MessageCircle className="w-4 h-4" />
                   AI Chat
                 </button>
+                <button
+                  onClick={() => setShowStepOptimization(true)}
+                  className="px-3 py-1 bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-700 hover:to-yellow-700 text-white rounded-lg transition-colors text-sm flex items-center gap-2"
+                  title="Optimize complex workflow steps"
+                >
+                  ⚡ Optimize
+                </button>
               </>
             )}
           </div>
@@ -384,7 +408,7 @@ const UserWorkflowInterface: React.FC = () => {
           {comprehensiveAnalysis.gaps?.internalGaps?.missingSteps && comprehensiveAnalysis.gaps.internalGaps.missingSteps.length > 0 && (
             <GapDetectionPanel
               missingSteps={comprehensiveAnalysis.gaps.internalGaps.missingSteps}
-              onAddStep={(stepText, index) => {
+              onAddStep={(stepText) => {
                 // Add the missing step to the workflow
                 const newStep = {
                   id: `added-step-${Date.now()}`,
@@ -425,13 +449,7 @@ const UserWorkflowInterface: React.FC = () => {
             />
           )}
 
-          {/* Domain-Agnostic Gap Detection Orange Box - NEW! */}
-          {comprehensiveAnalysis.domainAgnosticGaps && comprehensiveAnalysis.domainAgnosticGaps.summary.total > 0 && (
-            console.log('🔍 Domain-Agnostic Gap Panel condition:', {
-              exists: !!comprehensiveAnalysis.domainAgnosticGaps,
-              total: comprehensiveAnalysis.domainAgnosticGaps?.summary?.total
-            })
-          )}
+          {/* Domain-Agnostic Gap Detection Orange Box */}
           {comprehensiveAnalysis.domainAgnosticGaps && comprehensiveAnalysis.domainAgnosticGaps.summary.total > 0 && (
             <DomainAgnosticGapPanel
               analysis={comprehensiveAnalysis.domainAgnosticGaps}
@@ -477,11 +495,14 @@ const UserWorkflowInterface: React.FC = () => {
         </div>
       )}
 
-      {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Main Resizable Layout */}
+      <div id="resizable-container" className="flex gap-0 relative" style={{ maxHeight: 'calc(100vh - 200px)' }}>
         
         {/* Left Column - Input & Controls */}
-        <div className="space-y-6">
+        <div 
+          className="space-y-6 overflow-y-auto pr-3 h-full"
+          style={{ width: `${leftWidth}%`, minWidth: '300px' }}
+        >
           
           {/* File Upload */}
           <FileUploadComponent
@@ -507,8 +528,20 @@ const UserWorkflowInterface: React.FC = () => {
           )}
         </div>
 
+        {/* Draggable Divider */}
+        <div
+          onMouseDown={handleMouseDown}
+          className="w-1 bg-gray-300 dark:bg-gray-600 hover:bg-primary-500 dark:hover:bg-primary-400 cursor-col-resize transition-colors relative group"
+          style={{ minWidth: '4px' }}
+        >
+          <div className="absolute inset-y-0 -left-1 -right-1 group-hover:bg-primary-500/20" />
+        </div>
+
         {/* Right Column - Visualization & Analysis */}
-        <div className="space-y-6">
+        <div 
+          className="space-y-6 overflow-y-auto pl-3 h-full"
+          style={{ width: `${100 - leftWidth}%`, minWidth: '300px' }}
+        >
           
           {/* Workflow Visualization - Interactive ReactFlow */}
           {workflow.length > 0 ? (
@@ -529,15 +562,6 @@ const UserWorkflowInterface: React.FC = () => {
                 Enter SOP text and click "Create Workflow" to see your interactive flowchart here
               </p>
             </div>
-          )}
-
-          {/* AI Ordering Comparison Panel */}
-          {orderingIssue && (
-            <AIOrderingComparisonPanel
-              orderingIssue={orderingIssue}
-              onApplySuggestedOrder={handleApplySuggestedOrder}
-              onKeepOriginal={handleKeepOriginalOrder}
-            />
           )}
 
           {/* Workflow Analysis */}

@@ -46,6 +46,8 @@ Return ONLY valid JSON in this exact format:
 
 Rules:
 - Extract ALL steps, even if not explicitly numbered
+- KEEP DUPLICATE STEPS - Do not remove or merge steps that appear multiple times
+- Preserve every occurrence of similar or identical steps (users will decide later if they're true duplicates)
 - Detect implicit steps (e.g., "After checking, notify manager" = two steps)
 - Use "decision" type for conditional steps (if/else, check, verify)
 - Use "decision" type for intimate workflow steps that represent binary choices (e.g., "Kiss her next" = decision to continue or stop)
@@ -53,7 +55,7 @@ Rules:
 - Use "start" for beginning steps, "end" for final steps
 - Use "process" for regular action steps
 - Provide confidence score (0-1) for extraction quality
-- Suggest improvements if workflow has issues`;
+- Suggest improvements if workflow has issues (but do not mention duplicates - users have a separate tool for that)`;
 
     // Use OpenAI proxy to avoid CORS issues
     const { callOpenAIProxy } = await import('../../services/openaiProxy');
