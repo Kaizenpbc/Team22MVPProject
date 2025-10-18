@@ -159,19 +159,28 @@ const UserWorkflowInterface: React.FC = () => {
     }
 
     // Check if user has an API key configured (BYOK model)
-    const { hasAPIKey } = await import('../../../services/apiKeyService');
-    if (!hasAPIKey()) {
-      const confirmed = window.confirm(
-        '🔑 OpenAI API Key Required\n\n' +
-        'AI Analysis requires your own OpenAI API key.\n\n' +
-        'This is part of our BYOK (Bring Your Own Key) pricing model.\n' +
-        'You only pay OpenAI directly for what you use (~$0.01 per analysis).\n\n' +
-        'Would you like to configure your API key now?'
-      );
-      if (confirmed) {
-        window.location.href = '/settings';
+    // Exempt test users and admins - they use system API key
+    const isTestUser = user.email?.includes('test@') || user.email?.includes('@test.');
+    const isAdminUser = user.email?.includes('admin') || user.email?.includes('@kpbc.ca');
+    const isExempt = isTestUser || isAdminUser;
+    
+    if (!isExempt) {
+      const { hasAPIKey } = await import('../../../services/apiKeyService');
+      if (!hasAPIKey()) {
+        const confirmed = window.confirm(
+          '🔑 OpenAI API Key Required\n\n' +
+          'AI Analysis requires your own OpenAI API key.\n\n' +
+          'This is part of our BYOK (Bring Your Own Key) pricing model.\n' +
+          'You only pay OpenAI directly for what you use (~$0.01 per analysis).\n\n' +
+          'Would you like to configure your API key now?'
+        );
+        if (confirmed) {
+          window.location.href = '/settings';
+        }
+        return;
       }
-      return;
+    } else {
+      console.log('🔓 Exempt user (test/admin) - using system API key for analysis');
     }
 
     // Check if user has enough credits
@@ -278,19 +287,28 @@ const UserWorkflowInterface: React.FC = () => {
     }
 
     // Check if user has an API key configured (BYOK model)
-    const { hasAPIKey } = await import('../../../services/apiKeyService');
-    if (!hasAPIKey()) {
-      const confirmed = window.confirm(
-        '🔑 OpenAI API Key Required\n\n' +
-        'AI features require your own OpenAI API key.\n\n' +
-        'This is part of our BYOK (Bring Your Own Key) pricing model.\n' +
-        'You only pay OpenAI directly for what you use (~$0.02 per workflow).\n\n' +
-        'Would you like to configure your API key now?'
-      );
-      if (confirmed) {
-        window.location.href = '/settings';
+    // Exempt test users and admins - they use system API key
+    const isTestUser = user.email?.includes('test@') || user.email?.includes('@test.');
+    const isAdminUser = user.email?.includes('admin') || user.email?.includes('@kpbc.ca');
+    const isExempt = isTestUser || isAdminUser;
+    
+    if (!isExempt) {
+      const { hasAPIKey } = await import('../../../services/apiKeyService');
+      if (!hasAPIKey()) {
+        const confirmed = window.confirm(
+          '🔑 OpenAI API Key Required\n\n' +
+          'AI features require your own OpenAI API key.\n\n' +
+          'This is part of our BYOK (Bring Your Own Key) pricing model.\n' +
+          'You only pay OpenAI directly for what you use (~$0.02 per workflow).\n\n' +
+          'Would you like to configure your API key now?'
+        );
+        if (confirmed) {
+          window.location.href = '/settings';
+        }
+        return;
       }
-      return;
+    } else {
+      console.log('🔓 Exempt user (test/admin) - using system API key');
     }
 
     console.log('🔍 Starting AI Parse for user:', user.email);
