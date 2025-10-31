@@ -96,12 +96,12 @@ export const detectInternalGaps = (steps: WorkflowStep[]): GapAnalysis['internal
   
   // Eating without washing hands before
   const hasEating = stepTexts.some(s => 
-    s.includes('eat') || s.includes('food') || s.includes('meal')
+    /\beat\b/.test(s) || /\beating\b/.test(s) || /\bfood\b/.test(s) || /\bmeal\b/.test(s)
   );
   const hasHandWashingBefore = stepTexts.some((s, index) => 
     (s.includes('wash') || s.includes('cleanse')) && 
     s.includes('hand') && 
-    index < stepTexts.findIndex(step => step.includes('eat') || step.includes('food'))
+    index < stepTexts.findIndex(step => /\beat\b/.test(step) || /\beating\b/.test(step) || /\bfood\b/.test(step))
   );
   
   if (hasEating && !hasHandWashingBefore) {

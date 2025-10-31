@@ -137,6 +137,8 @@ const UserWorkflowInterface: React.FC = () => {
 
   // Handle template selection
   const handleTemplateSelect = (template: WorkflowTemplate) => {
+    // Clear previous analysis when loading a new template
+    setComprehensiveAnalysis(null);
     setWorkflow(template.steps);
     setSopText(template.steps.map((step, i) => `${i + 1}. ${step.text}`).join('\n'));
     setShowTemplateSelector(false);
@@ -230,6 +232,8 @@ const UserWorkflowInterface: React.FC = () => {
       return;
     }
 
+    // Clear previous analysis results when creating new workflow
+    setComprehensiveAnalysis(null);
     setIsCreating(true);
     
     try {
@@ -339,6 +343,8 @@ const UserWorkflowInterface: React.FC = () => {
       return;
     }
 
+    // Clear previous analysis results when creating new workflow
+    setComprehensiveAnalysis(null);
     setIsParsingWithAI(true);
     
     try {
@@ -401,28 +407,40 @@ const UserWorkflowInterface: React.FC = () => {
             <span className="ml-2 text-primary-600 dark:text-primary-400 font-bold">(Standard User)</span>
           </p>
           <div className="flex gap-2 flex-wrap">
+            {/* Document Parsing Flow */}
             <button
               onClick={() => setShowTemplateSelector(true)}
-              className="px-3 py-1 bg-white dark:bg-gray-800 border border-primary-300 dark:border-primary-700 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors text-sm flex items-center gap-2"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2 shadow-md"
+              title="Load pre-built workflow templates"
             >
               <BookTemplate className="w-4 h-4" />
-              Templates
+              📋 Templates
             </button>
+            
+            {/* Workflow Enhancement Flow */}
             {workflow.length > 0 && (
               <>
+                <button
+                  onClick={() => setShowStepOptimization(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-700 hover:to-yellow-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2 shadow-md"
+                  title="Improve existing workflow with AI analysis"
+                >
+                  ⚡ Improve Workflow
+                </button>
+                <button
+                  onClick={() => setShowReorderView(true)}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2 shadow-md"
+                  title="Reorder and edit workflow steps"
+                >
+                  <ArrowUpDown className="w-4 h-4" />
+                  🔄 Reorder
+                </button>
                 <button
                   onClick={() => setShowFullScreen(true)}
                   className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors text-sm flex items-center gap-2"
                   title="Open interactive full screen editor"
                 >
                   🖥️ Full Screen
-                </button>
-                <button
-                  onClick={() => setShowReorderView(true)}
-                  className="px-3 py-1 bg-white dark:bg-gray-800 border border-primary-300 dark:border-primary-700 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900 transition-colors text-sm flex items-center gap-2"
-                >
-                  <ArrowUpDown className="w-4 h-4" />
-                  Reorder
                 </button>
                 <button
                   onClick={runAnalysis}
@@ -438,14 +456,23 @@ const UserWorkflowInterface: React.FC = () => {
                   <MessageCircle className="w-4 h-4" />
                   AI Chat
                 </button>
-                <button
-                  onClick={() => setShowStepOptimization(true)}
-                  className="px-3 py-1 bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-700 hover:to-yellow-700 text-white rounded-lg transition-colors text-sm flex items-center gap-2"
-                  title="Optimize complex workflow steps"
-                >
-                  ⚡ Optimize
-                </button>
               </>
+            )}
+            
+            {/* Utility Actions */}
+            {workflow.length > 0 && (
+              <button
+                onClick={() => {
+                  setWorkflow([]);
+                  setSopText('');
+                  setComprehensiveAnalysis(null);
+                  setUploadedFileName('');
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2 shadow-md"
+                title="Clear current workflow and start fresh"
+              >
+                🗑️ Clear
+              </button>
             )}
           </div>
         </div>
@@ -562,15 +589,26 @@ const UserWorkflowInterface: React.FC = () => {
             uploadedFileName={uploadedFileName}
           />
 
-          {/* SOP Text Editor */}
-          <WorkflowEditor
-            value={sopText}
-            onChange={setSopText}
-            onCreateWorkflow={createWorkflow}
-            onParseWithAI={parseWithAI}
-            isCreating={isCreating}
-            isParsingWithAI={isParsingWithAI}
-          />
+          {/* Document Parsing Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                📄 Document Parsing Flow
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Parse scrambled documents, SOPs, or unstructured text into clean workflows with supporting details.
+              </p>
+            </div>
+            
+            <WorkflowEditor
+              value={sopText}
+              onChange={setSopText}
+              onCreateWorkflow={createWorkflow}
+              onParseWithAI={parseWithAI}
+              isCreating={isCreating}
+              isParsingWithAI={isParsingWithAI}
+            />
+          </div>
 
           {/* Export Panel */}
           {workflow.length > 0 && (
@@ -593,17 +631,28 @@ const UserWorkflowInterface: React.FC = () => {
           style={{ width: `${100 - leftWidth}%`, minWidth: '300px' }}
         >
           
-          {/* Workflow Visualization - Interactive ReactFlow */}
+          {/* Workflow Enhancement Flow */}
           {workflow.length > 0 ? (
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="p-4 bg-gradient-to-r from-primary-600 to-accent-600 text-white">
-                <h3 className="font-bold text-lg">🔄 Interactive Workflow Diagram</h3>
-                <p className="text-sm text-white text-opacity-90">Drag nodes • Zoom with mouse wheel • Pan by dragging</p>
+            <div className="space-y-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  ⚡ Workflow Enhancement Flow
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Enhance existing workflows with AI analysis, optimization, and interactive editing tools.
+                </p>
               </div>
-              <EnhancedWorkflowFlowchart 
-                steps={workflow} 
-                analysis={comprehensiveAnalysis}
-              />
+              
+              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div className="p-4 bg-gradient-to-r from-primary-600 to-accent-600 text-white">
+                  <h3 className="font-bold text-lg">🔄 Interactive Workflow Diagram</h3>
+                  <p className="text-sm text-white text-opacity-90">Drag nodes • Zoom with mouse wheel • Pan by dragging</p>
+                </div>
+                <EnhancedWorkflowFlowchart 
+                  steps={workflow} 
+                  analysis={comprehensiveAnalysis}
+                />
+              </div>
             </div>
           ) : (
             <div className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center">

@@ -108,32 +108,43 @@ const analyzeDomainSpecificGaps = async (
   }
   
   try {
-    const prompt = `Analyze this workflow and identify missing steps. Consider the domain and suggest logical missing steps.
+    const prompt = `You are a business process expert. Analyze this BUSINESS workflow and suggest ONLY relevant business process improvements.
 
 Workflow steps:
 ${steps.map((s, i) => `${i + 1}. ${s.text}`).join('\n')}
 
+IMPORTANT: This is a BUSINESS workflow. Do NOT suggest:
+- Personal hygiene steps (washing hands, etc.)
+- Medical procedures
+- Cooking/food preparation steps
+- Generic life advice
+
+Focus ONLY on business process improvements like:
+- Documentation steps
+- Communication steps  
+- Quality control steps
+- Approval processes
+- Follow-up actions
+- Data collection
+- Stakeholder notifications
+
 Instructions:
-1. Identify what domain/industry this workflow belongs to
-2. Suggest 2-3 critical missing steps that would be expected in this domain
-3. For each missing step, provide:
-   - The missing step description
-   - Why it's missing (reasoning)
-   - Priority level (CRITICAL/HIGH/MEDIUM/LOW)
-   - Where it should be inserted (position)
+1. Identify the business domain (sales, customer service, operations, etc.)
+2. Suggest 1-2 relevant business process steps that are commonly missing
+3. Each suggestion must be directly related to the workflow's business purpose
 
 Return ONLY valid JSON:
 {
-  "domain": "domain name (e.g., medical, culinary, intimate, business, etc.)",
+  "domain": "business domain (sales, customer service, operations, etc.)",
   "confidence": 0.0 to 1.0,
   "missingSteps": [
     {
       "position": number (where to insert, 0-based),
-      "suggestion": "missing step description",
-      "reason": "why this step is missing",
+      "suggestion": "business process step description",
+      "reason": "why this business step is missing",
       "priority": "CRITICAL|HIGH|MEDIUM|LOW",
-      "description": "detailed description",
-      "impact": "what happens if missing"
+      "description": "detailed business description",
+      "impact": "business impact if missing"
     }
   ]
 }`;
@@ -295,19 +306,21 @@ const checkMissingPrerequisites = (
   }
   
   // Hygiene patterns - eating without washing hands first
-  if (currentStep.includes('eat') && !nextStep.includes('wash') && !nextStep.includes('cleanse')) {
-    console.log('🚨 Found hygiene prerequisite gap');
-    return {
-      position: index,
-      suggestion: 'Wash hands before eating',
-      reason: 'You\'re eating but never washed your hands first',
-      priority: 'HIGH',
-      type: 'missing-prerequisite',
-      description: 'Eating requires clean hands as a prerequisite',
-      impact: 'Risk of ingesting germs and bacteria',
-      source: 'AI_CAUSAL_ANALYSIS',
-      confidence: 0.8
-    };
+  if (/\beat\b/.test(currentStep) || /\beating\b/.test(currentStep)) {
+    if (!nextStep.includes('wash') && !nextStep.includes('cleanse')) {
+      console.log('🚨 Found hygiene prerequisite gap');
+      return {
+        position: index,
+        suggestion: 'Wash hands before eating',
+        reason: 'You\'re eating but never washed your hands first',
+        priority: 'HIGH',
+        type: 'missing-prerequisite',
+        description: 'Eating requires clean hands as a prerequisite',
+        impact: 'Risk of ingesting germs and bacteria',
+        source: 'AI_CAUSAL_ANALYSIS',
+        confidence: 0.8
+      };
+    }
   }
   
   return null;
@@ -373,8 +386,8 @@ const analyzeSetupExecuteCleanupPattern = (steps: WorkflowStep[]): DomainAgnosti
   );
   const hasExecution = stepTexts.some(s => 
     s.includes('execute') || s.includes('run') || s.includes('do') || 
-    s.includes('perform') || s.includes('eat') || s.includes('poop') || 
-    s.includes('wipe') // Hygiene execution
+    s.includes('perform') || /\beat\b/.test(s) || /\beating\b/.test(s) || 
+    s.includes('poop') || s.includes('wipe') // Hygiene execution
   );
   const hasCleanup = stepTexts.some(s => 
     s.includes('cleanup') || s.includes('close') || s.includes('finish') || 

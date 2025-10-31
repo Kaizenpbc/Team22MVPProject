@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { WorkflowStep } from '../../utils/workflow/workflowEditor';
 import { analyzeWorkflowSteps, StepAnalysis, applyStepSplits } from '../../utils/workflow/stepOptimizer';
 import { analyzeWorkflowOrdering } from '../../utils/workflow/aiOrderingAnalysis';
-import { Check, X, AlertTriangle, ArrowRight, RotateCcw, List } from 'lucide-react';
+import { runComprehensiveAnalysis, ComprehensiveAnalysis } from '../../utils/workflow/comprehensiveWorkflowAnalysis';
+import { Check, X, AlertTriangle, ArrowRight, RotateCcw, List, Plus, Trash2, Edit3 } from 'lucide-react';
 
 interface StepOptimizationPanelProps {
   workflow: WorkflowStep[];
@@ -21,15 +22,38 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
   const [orderingIssue, setOrderingIssue] = useState<any>(null);
   const [isAnalyzingOrder, setIsAnalyzingOrder] = useState(true);
   
-  // Analyze ordering on mount
+  // NEW: Comprehensive analysis state
+  const [comprehensiveAnalysis, setComprehensiveAnalysis] = useState<ComprehensiveAnalysis | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(true);
+  const [selectedGaps, setSelectedGaps] = useState<string[]>([]);
+  const [newSteps, setNewSteps] = useState<WorkflowStep[]>([]);
+  const [editingStep, setEditingStep] = useState<number | null>(null);
+  const [editText, setEditText] = useState('');
+  
+  // Analyze ordering and comprehensive analysis on mount
   useEffect(() => {
-    const analyzeOrder = async () => {
-      const apiKey = localStorage.getItem('openai_api_key');
-      const ordering = await analyzeWorkflowOrdering(workflow, apiKey);
-      setOrderingIssue(ordering);
-      setIsAnalyzingOrder(false);
+    const runAnalysis = async () => {
+      try {
+        setIsAnalyzing(true);
+        
+        // Run comprehensive analysis
+        const analysis = await runComprehensiveAnalysis(workflow);
+        setComprehensiveAnalysis(analysis);
+        
+        // Run ordering analysis
+        const apiKey = localStorage.getItem('openai_api_key');
+        const ordering = await analyzeWorkflowOrdering(workflow, apiKey);
+        setOrderingIssue(ordering);
+        setIsAnalyzingOrder(false);
+        
+        setIsAnalyzing(false);
+      } catch (error) {
+        console.error('Analysis failed:', error);
+        setIsAnalyzing(false);
+        setIsAnalyzingOrder(false);
+      }
     };
-    analyzeOrder();
+    runAnalysis();
   }, [workflow]);
 
   const complexSteps = analyses.filter(a => a.shouldSplit);
@@ -57,6 +81,52 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
     onClose();
   };
 
+  // NEW: Gap analysis functions
+  const handleAddGap = (gap: any) => {
+    const newStep: WorkflowStep = {
+      id: `gap-${Date.now()}`,
+      text: gap.suggestion,
+      type: 'process',
+      name: gap.suggestion
+    };
+    setNewSteps(prev => [...prev, newStep]);
+    setSelectedGaps(prev => [...prev, gap.type]);
+  };
+
+  const handleRemoveGap = (gapType: string) => {
+    setSelectedGaps(prev => prev.filter(id => id !== gapType));
+    setNewSteps(prev => prev.filter(step => !step.id.startsWith('gap-')));
+  };
+
+  const handleAddCustomStep = () => {
+    const newStep: WorkflowStep = {
+      id: `custom-${Date.now()}`,
+      text: 'New step - click to edit',
+      type: 'process',
+      name: 'New Step'
+    };
+    setNewSteps(prev => [...prev, newStep]);
+  };
+
+  const handleEditStep = (index: number) => {
+    setEditingStep(index);
+    setEditText(newSteps[index].text);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingStep !== null) {
+      const updatedSteps = [...newSteps];
+      updatedSteps[editingStep] = { ...updatedSteps[editingStep], text: editText };
+      setNewSteps(updatedSteps);
+      setEditingStep(null);
+      setEditText('');
+    }
+  };
+
+  const handleDeleteStep = (index: number) => {
+    setNewSteps(prev => prev.filter((_, i) => i !== index));
+  };
+
   const previewWorkflow = showPreview ? applyStepSplits(workflow, selectedSplits) : workflow;
 
   return (
@@ -66,10 +136,16 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-6 flex-shrink-0 shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold">⚡ Optimize Workflow</h2>
+              <h2 className="text-3xl font-bold">⚡ Smart Workflow Optimizer</h2>
               <p className="text-blue-100 mt-2 text-lg">
-                AI-powered step ordering analysis + complex step detection
+                AI gap analysis + step optimization + missing task detection
               </p>
+              {isAnalyzing && (
+                <div className="flex items-center mt-2 text-blue-200">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <span className="text-sm">Analyzing workflow gaps and optimization opportunities...</span>
+                </div>
+              )}
             </div>
             <button
               onClick={onClose}
@@ -111,6 +187,49 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* NEW: Gap Analysis Section */}
+              {comprehensiveAnalysis?.gaps?.internalGaps?.missingSteps && comprehensiveAnalysis.gaps.internalGaps.missingSteps.length > 0 && (
+                <div className="bg-orange-50 border-2 border-orange-400 rounded-lg p-4">
+                  <div className="flex items-center mb-3">
+                    <AlertTriangle className="w-5 h-5 text-orange-600 mr-2" />
+                    <h3 className="font-semibold text-orange-900">🔍 Missing Steps Detected</h3>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {comprehensiveAnalysis.gaps.internalGaps.missingSteps.map((gap, index) => (
+                      <div key={index} className="bg-white rounded border border-orange-200 p-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center mb-2">
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                gap.priority === 'CRITICAL' ? 'bg-red-100 text-red-800' :
+                                gap.priority === 'HIGH' ? 'bg-orange-100 text-orange-800' :
+                                gap.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-green-100 text-green-800'
+                              }`}>
+                                {gap.priority}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-800 mb-1">{gap.suggestion}</p>
+                            <p className="text-xs text-gray-500">{gap.reason}</p>
+                          </div>
+                          <button
+                            onClick={() => selectedGaps.includes(gap.type) ? handleRemoveGap(gap.type) : handleAddGap(gap)}
+                            className={`ml-3 px-3 py-1 rounded text-xs font-medium transition-colors ${
+                              selectedGaps.includes(gap.type)
+                                ? 'bg-green-600 text-white hover:bg-green-700'
+                                : 'bg-orange-600 text-white hover:bg-orange-700'
+                            }`}
+                          >
+                            {selectedGaps.includes(gap.type) ? '✓ Added' : '+ Add'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* AI Ordering Analysis */}
               {isAnalyzingOrder ? (
@@ -172,6 +291,85 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
                   </p>
                 </div>
               ) : null}
+
+              {/* NEW: Custom Step Addition */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-blue-900 flex items-center">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Custom Steps
+                  </h3>
+                  <button
+                    onClick={handleAddCustomStep}
+                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors"
+                  >
+                    + Add Step
+                  </button>
+                </div>
+                
+                {newSteps.length > 0 && (
+                  <div className="space-y-2">
+                    {newSteps.map((step, index) => (
+                      <div key={index} className="bg-white rounded border border-blue-200 p-3">
+                        <div className="flex items-center gap-2">
+                          {editingStep === index ? (
+                            <input
+                              type="text"
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleSaveEdit();
+                                if (e.key === 'Escape') { setEditingStep(null); setEditText(''); }
+                              }}
+                              className="flex-1 px-2 py-1 border border-blue-300 rounded text-sm"
+                              autoFocus
+                            />
+                          ) : (
+                            <span className="flex-1 text-sm text-gray-800">{step.text}</span>
+                          )}
+                          <div className="flex gap-1">
+                            {editingStep === index ? (
+                              <>
+                                <button
+                                  onClick={handleSaveEdit}
+                                  className="p-1 text-green-600 hover:bg-green-100 rounded"
+                                  title="Save"
+                                >
+                                  <Check className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={() => { setEditingStep(null); setEditText(''); }}
+                                  className="p-1 text-red-600 hover:bg-red-100 rounded"
+                                  title="Cancel"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => handleEditStep(index)}
+                                  className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                                  title="Edit"
+                                >
+                                  <Edit3 className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteStep(index)}
+                                  className="p-1 text-red-600 hover:bg-red-100 rounded"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Complex Steps */}
               {complexSteps.length === 0 ? (
@@ -259,43 +457,85 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
             </div>
           </div>
 
-          {/* Right Panel - Preview */}
-          <div className="w-1/3 p-8 bg-white overflow-y-auto border-l border-gray-300">
+          {/* Right Panel - Side-by-Side Comparison */}
+          <div className="w-1/2 p-8 bg-white overflow-y-auto border-l border-gray-300">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900">Preview</h3>
+              <h3 className="font-semibold text-gray-900">Current vs Optimized</h3>
               <button
                 onClick={() => setShowPreview(!showPreview)}
                 className="flex items-center text-sm text-blue-600 hover:text-blue-700"
               >
                 <RotateCcw className="w-4 h-4 mr-1" />
-                {showPreview ? 'Hide' : 'Show'} Preview
+                {showPreview ? 'Hide' : 'Show'} Comparison
               </button>
             </div>
 
             {showPreview && (
-              <div className="space-y-2">
-                {previewWorkflow.map((step) => (
-                  <div
-                    key={step.id || `preview-${step.number}`}
-                    className="bg-white rounded border p-3 text-sm"
-                  >
-                    <div className="flex items-center mb-1">
-                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2">
-                        {step.number}
-                      </span>
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                        {step.type}
-                      </span>
-                    </div>
-                    <p className="text-gray-800">{step.text}</p>
+              <div className="grid grid-cols-2 gap-4">
+                {/* Current Workflow */}
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-3 flex items-center">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                    Current Workflow ({workflow.length} steps)
+                  </h4>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {workflow.map((step, index) => (
+                      <div key={index} className="bg-blue-50 rounded border border-blue-200 p-3 text-sm">
+                        <div className="flex items-center mb-1">
+                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2">
+                            {index + 1}
+                          </span>
+                          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                            {step.type || 'process'}
+                          </span>
+                        </div>
+                        <p className="text-gray-800">{step.text}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                {/* Optimized Workflow */}
+                <div>
+                  <h4 className="font-medium text-gray-700 mb-3 flex items-center">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                    Optimized Workflow ({workflow.length + newSteps.length} steps)
+                  </h4>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {[...workflow, ...newSteps].map((step, index) => (
+                      <div key={index} className={`rounded border p-3 text-sm ${
+                        newSteps.includes(step) 
+                          ? 'bg-green-50 border-green-200' 
+                          : 'bg-blue-50 border-blue-200'
+                      }`}>
+                        <div className="flex items-center mb-1">
+                          <span className={`text-xs px-2 py-1 rounded-full mr-2 ${
+                            newSteps.includes(step)
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {index + 1}
+                          </span>
+                          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                            {step.type || 'process'}
+                          </span>
+                          {newSteps.includes(step) && (
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded ml-2">
+                              NEW
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gray-800">{step.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
             {!showPreview && (
               <div className="text-center py-8 text-gray-500">
-                <p className="text-sm">Click "Show Preview" to see the optimized workflow</p>
+                <p className="text-sm">Click "Show Comparison" to see current vs optimized workflow</p>
               </div>
             )}
           </div>
@@ -304,9 +544,9 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
         {/* Footer */}
         <div className="bg-gray-50 px-6 py-4 flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            {Object.keys(selectedSplits).length > 0 ? (
+            {Object.keys(selectedSplits).length > 0 || newSteps.length > 0 ? (
               <>
-                {Object.keys(selectedSplits).length} step(s) selected for splitting
+                {Object.keys(selectedSplits).length} step(s) selected for splitting, {newSteps.length} new step(s) added
               </>
             ) : (
               'No changes selected'
@@ -320,11 +560,14 @@ const StepOptimizationPanel: React.FC<StepOptimizationPanelProps> = ({
               Cancel
             </button>
             <button
-              onClick={handleApplyAll}
-              disabled={Object.keys(selectedSplits).length === 0}
+              onClick={() => {
+                const finalWorkflow = [...workflow, ...newSteps];
+                onApplySplits(finalWorkflow);
+              }}
+              disabled={Object.keys(selectedSplits).length === 0 && newSteps.length === 0}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
-              Apply Changes ({Object.keys(selectedSplits).length})
+              Apply Changes ({Object.keys(selectedSplits).length + newSteps.length})
             </button>
           </div>
         </div>
