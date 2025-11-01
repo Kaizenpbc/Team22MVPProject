@@ -7,7 +7,8 @@ import {
   Plus,
   Check,
   X,
-  AlertCircle
+  AlertCircle,
+  Info
 } from 'lucide-react';
 import { WorkflowStep } from '../../../utils/workflow/workflowEditor';
 
@@ -32,6 +33,12 @@ const WorkflowReorderingView: React.FC<WorkflowReorderingViewProps> = ({
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
   const [hasChanges, setHasChanges] = useState(false);
+  
+  // Hover details editing state
+  const [editingHoverIndex, setEditingHoverIndex] = useState<number | null>(null);
+  const [hoverTitle, setHoverTitle] = useState('');
+  const [hoverItems, setHoverItems] = useState<string[]>(['']);
+  const [hoverCategory, setHoverCategory] = useState('');
 
   const handleDragStart = (index: number) => {
     setDraggedIndex(index);
@@ -134,6 +141,58 @@ const WorkflowReorderingView: React.FC<WorkflowReorderingViewProps> = ({
 
   const handleCancel = () => {
     if (onClose) onClose();
+  };
+
+  // Hover details editing functions
+  const handleEditHoverDetails = (index: number) => {
+    const step = steps[index];
+    setEditingHoverIndex(index);
+    setHoverTitle(step.hoverDetails?.title || '');
+    setHoverItems(step.hoverDetails?.items || ['']);
+    setHoverCategory(step.hoverDetails?.category || '');
+  };
+
+  const handleSaveHoverDetails = () => {
+    if (editingHoverIndex !== null) {
+      const newSteps = [...steps];
+      newSteps[editingHoverIndex] = {
+        ...newSteps[editingHoverIndex],
+        hoverDetails: {
+          title: hoverTitle.trim(),
+          items: hoverItems.filter(item => item.trim()),
+          category: hoverCategory.trim() || undefined
+        }
+      };
+      setSteps(newSteps);
+      setEditingHoverIndex(null);
+      setHoverTitle('');
+      setHoverItems(['']);
+      setHoverCategory('');
+      setHasChanges(true);
+    }
+  };
+
+  const handleCancelHoverEdit = () => {
+    setEditingHoverIndex(null);
+    setHoverTitle('');
+    setHoverItems(['']);
+    setHoverCategory('');
+  };
+
+  const handleAddHoverItem = () => {
+    setHoverItems([...hoverItems, '']);
+  };
+
+  const handleRemoveHoverItem = (itemIndex: number) => {
+    if (hoverItems.length > 1) {
+      setHoverItems(hoverItems.filter((_, i) => i !== itemIndex));
+    }
+  };
+
+  const handleUpdateHoverItem = (itemIndex: number, value: string) => {
+    const newItems = [...hoverItems];
+    newItems[itemIndex] = value;
+    setHoverItems(newItems);
   };
 
   const getStepTypeColor = (type: string = 'process') => {
@@ -249,6 +308,13 @@ const WorkflowReorderingView: React.FC<WorkflowReorderingViewProps> = ({
                     ) : (
                       <>
                         <button
+                          onClick={() => handleEditHoverDetails(index)}
+                          className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+                          title="Edit hover details"
+                        >
+                          <Info className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => handleMoveUp(index)}
                           disabled={index === 0}
                           className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
@@ -340,6 +406,143 @@ const WorkflowReorderingView: React.FC<WorkflowReorderingViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Hover Details Editing Modal */}
+      {editingHoverIndex !== null && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-1">Edit Hover Details</h3>
+                  <p className="text-white text-opacity-90 text-sm">
+                    Add details that will show when users hover over this step in the flowchart
+                  </p>
+                </div>
+                <button
+                  onClick={handleCancelHoverEdit}
+                  className="text-white text-opacity-70 hover:text-opacity-100 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              <div className="space-y-6">
+                
+                {/* Title Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Tooltip Title
+                  </label>
+                  <input
+                    type="text"
+                    value={hoverTitle}
+                    onChange={(e) => setHoverTitle(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., Add name to directory"
+                  />
+                </div>
+
+                {/* Category Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Category (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={hoverCategory}
+                    onChange={(e) => setHoverCategory(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., Contact Information"
+                  />
+                </div>
+
+                {/* Items List */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Details to Show on Hover
+                  </label>
+                  <div className="space-y-2">
+                    {hoverItems.map((item, itemIndex) => (
+                      <div key={itemIndex} className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={item}
+                          onChange={(e) => handleUpdateHoverItem(itemIndex, e.target.value)}
+                          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder={`Detail ${itemIndex + 1}`}
+                        />
+                        {hoverItems.length > 1 && (
+                          <button
+                            onClick={() => handleRemoveHoverItem(itemIndex)}
+                            className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
+                            title="Remove this item"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      onClick={handleAddHoverItem}
+                      className="w-full py-2 px-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Another Detail
+                    </button>
+                  </div>
+                </div>
+
+                {/* Preview */}
+                {hoverTitle && hoverItems.some(item => item.trim()) && (
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 dark:text-white mb-2">Preview:</h4>
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+                      <div className="font-bold text-blue-600 mb-1">{hoverTitle}</div>
+                      {hoverCategory && (
+                        <div className="text-xs text-gray-500 mb-2 uppercase tracking-wide">{hoverCategory}</div>
+                      )}
+                      <ul className="text-sm text-gray-700 dark:text-gray-300">
+                        {hoverItems.filter(item => item.trim()).map((item, index) => (
+                          <li key={index} className="mb-1">• {item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  These details will appear when users hover over the step in the flowchart
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleCancelHoverEdit}
+                    className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveHoverDetails}
+                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all"
+                  >
+                    Save Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

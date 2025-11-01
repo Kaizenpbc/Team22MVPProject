@@ -29,10 +29,32 @@ interface EnhancedWorkflowFlowchartProps {
   analysis?: ComprehensiveAnalysis | null;
 }
 
-// Custom node component with 4 connection handles
+// Custom node component with 4 connection handles and hover tooltip
 const CustomNode = ({ data }: any) => {
+  const [showTooltip, setShowTooltip] = React.useState(false);
+  const [hoverTimeout, setHoverTimeout] = React.useState<NodeJS.Timeout | null>(null);
+  
+  const handleMouseEnter = () => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      setHoverTimeout(null);
+    }
+    setShowTooltip(true);
+  };
+  
+  const handleMouseLeave = () => {
+    const timeout = setTimeout(() => {
+      setShowTooltip(false);
+    }, 100); // Small delay to prevent flickering
+    setHoverTimeout(timeout);
+  };
+  
   return (
-    <div>
+    <div 
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{ position: 'relative' }}
+    >
       {/* 4 Connection Handles - Top, Right, Bottom, Left */}
       <Handle
         type="target"
@@ -61,6 +83,69 @@ const CustomNode = ({ data }: any) => {
       
       {/* Node content */}
       {data.label}
+      
+      {/* Hover Tooltip */}
+      {showTooltip && data.hoverDetails && (
+        <div 
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            position: 'absolute',
+            top: '-10px',
+            left: '100%',
+            marginLeft: '10px',
+            backgroundColor: 'white',
+            border: '2px solid #2196F3',
+            borderRadius: '8px',
+            padding: '12px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: 1000,
+            minWidth: '200px',
+            maxWidth: '300px',
+            fontSize: '12px',
+            lineHeight: '1.4'
+          }}
+        >
+          {/* Tooltip Arrow */}
+          <div 
+            style={{
+              position: 'absolute',
+              left: '-8px',
+              top: '20px',
+              width: 0,
+              height: 0,
+              borderTop: '8px solid transparent',
+              borderBottom: '8px solid transparent',
+              borderRight: '8px solid #2196F3'
+            }}
+          />
+          
+          {/* Tooltip Content */}
+          <div style={{ fontWeight: 'bold', color: '#2196F3', marginBottom: '8px' }}>
+            {data.hoverDetails.title}
+          </div>
+          
+          {data.hoverDetails.category && (
+            <div style={{ 
+              fontSize: '10px', 
+              color: '#666', 
+              marginBottom: '6px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              {data.hoverDetails.category}
+            </div>
+          )}
+          
+          <ul style={{ margin: 0, paddingLeft: '16px' }}>
+            {data.hoverDetails.items.map((item: string, index: number) => (
+              <li key={index} style={{ marginBottom: '4px', color: '#333' }}>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
@@ -211,37 +296,40 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
         type: 'custom',
         data: {
           label: (
-            <div style={{ padding: '10px' }}>
-              <div style={{ 
-                fontSize: '12px',
-                color: '#999',
-                marginBottom: '5px',
-                fontWeight: 'bold'
-              }}>
-                STEP {index + 1}
-              </div>
+            <div style={{ 
+              padding: isDecision ? '5px 10px' : '10px',
+              textAlign: isDecision ? 'center' : 'left',
+              maxWidth: isDecision ? '200px' : 'none'
+            }}>
+              {!isDecision && (
+                <div style={{ 
+                  fontSize: '12px',
+                  color: '#999',
+                  marginBottom: '5px',
+                  fontWeight: 'bold'
+                }}>
+                  STEP {index + 1}
+                </div>
+              )}
 
               <div style={{
-                fontSize: '14px',
+                fontSize: isDecision ? '12px' : '14px',
                 fontWeight: 'bold',
-                marginBottom: '10px',
-                color: '#333'
+                marginBottom: isDecision ? '0px' : '10px',
+                color: '#333',
+                lineHeight: isDecision ? '1.2' : '1.4'
               }}>
                 {isDecision ? '🤔 ' : '📝 '}{stepText}
               </div>
               
               {isDecision && (
                 <div style={{
-                  fontSize: '10px',
+                  fontSize: '9px',
                   color: '#666',
                   fontStyle: 'italic',
-                  marginTop: '5px',
-                  padding: '2px 6px',
-                  backgroundColor: '#f0f0f0',
-                  borderRadius: '3px',
-                  display: 'inline-block'
+                  marginTop: '3px'
                 }}>
-                  Decision: Yes/No
+                  Decision Point
                 </div>
               )}
 
@@ -284,15 +372,23 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
                 </div>
               )}
             </div>
-          )
+          ),
+          // Pass hover details to the CustomNode
+          hoverDetails: step.hoverDetails
         },
         position: { x: currentX, y: currentY },
         style: {
           backgroundColor: nodeColor,
           border: `3px solid ${borderColor}`,
-          borderRadius: isDecision ? '50px' : '12px',
-          width: 300,
-          minHeight: 120
+          borderRadius: isDecision ? '0px' : '12px',
+          width: isDecision ? 0 : 300,
+          height: isDecision ? 0 : 120,
+          minHeight: isDecision ? 0 : 120,
+          clipPath: isDecision ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : 'none',
+          display: isDecision ? 'flex' : 'block',
+          alignItems: isDecision ? 'flex-start' : 'stretch',
+          justifyContent: isDecision ? 'center' : 'stretch',
+          padding: isDecision ? '20px 40px 0 40px' : '15px'
         }
       });
 
@@ -491,20 +587,13 @@ const EnhancedWorkflowFlowchart: React.FC<EnhancedWorkflowFlowchartProps> = ({
         padding: 15,
         borderRadius: 8,
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        zIndex: 10,
+        zIndex: 5,
         fontSize: 11
       }}>
         <div style={{ fontWeight: 'bold', marginBottom: 10 }}>LEGEND</div>
         <div style={{ marginBottom: 5 }}>🟢 Low Risk</div>
         <div style={{ marginBottom: 5 }}>🟡 Medium Risk</div>
         <div style={{ marginBottom: 5 }}>🔴 High Risk</div>
-        <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #e0e0e0' }}>
-          <div style={{ marginBottom: 5 }}>✋ Drag nodes to move</div>
-          <div style={{ marginBottom: 5 }}>🔌 Drag edge endpoints to reconnect</div>
-          <div style={{ marginBottom: 5 }}>➕ Drag from handles to create new connections</div>
-          <div style={{ marginBottom: 5 }}>🔍 Zoom with mouse wheel</div>
-          <div>🖱️ Pan by dragging background</div>
-        </div>
       </div>
 
       <ReactFlow

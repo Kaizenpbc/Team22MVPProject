@@ -9,6 +9,12 @@ export interface WorkflowStep {
   type?: string;
   number?: number;
   originalLine?: string;
+  // NEW: Hover tooltip details
+  hoverDetails?: {
+    title: string;
+    items: string[];
+    category?: string;
+  };
 }
 
 /**
@@ -50,23 +56,36 @@ const isIntimateDecisionStep = (text: string): boolean => {
 };
 
 /**
- * Parse workflow steps from SOP text
+ * Parse workflow steps from SOP text with automatic hover details extraction
  */
 export const parseSteps = (sopText: string): WorkflowStep[] => {
   if (!sopText || typeof sopText !== 'string') return [];
   
   const lines = sopText.split('\n').filter(line => line.trim());
   const steps: WorkflowStep[] = [];
+  let currentStepIndex = -1;
+  let currentStepDetails: string[] = [];
   
-  lines.forEach(line => {
+  lines.forEach((line, index) => {
     // Match numbered steps like "1. Step text" or "1) Step text"
     const match = line.match(/^\s*(\d+)[\.\)]\s*(.+)$/);
     if (match) {
+      // Save previous step with its details
+      if (currentStepIndex >= 0 && currentStepDetails.length > 0) {
+        steps[currentStepIndex].hoverDetails = {
+          title: steps[currentStepIndex].text,
+          category: getStepCategory(steps[currentStepIndex].text),
+          items: currentStepDetails
+        };
+      }
+      
       const text = match[2].trim();
       
       // Detect step type
       let type = 'task';
-      if (text.toLowerCase().includes('if ') || text.includes('?')) {
+      if (text.toLowerCase().includes('if ') || text.includes('?') || 
+          text.toLowerCase().includes('decision point') || 
+          text.toLowerCase().includes('qualification')) {
         type = 'decision';
       } else if (text.toLowerCase().includes('start') || text.toLowerCase().includes('begin')) {
         type = 'start';
@@ -84,10 +103,54 @@ export const parseSteps = (sopText: string): WorkflowStep[] => {
         type,
         originalLine: line
       });
+      
+      currentStepIndex = steps.length - 1;
+      currentStepDetails = [];
+    } else {
+      // Check for bullet points or sub-items under the current step
+      const bulletMatch = line.match(/^\s*[•\-\*]\s*(.+)$/);
+      const subItemMatch = line.match(/^\s*o\s*(.+)$/);
+      
+      if ((bulletMatch || subItemMatch) && currentStepIndex >= 0) {
+        const detailText = (bulletMatch?.[1] || subItemMatch?.[1] || '').trim();
+        if (detailText) {
+          currentStepDetails.push(detailText);
+        }
+      }
     }
   });
   
+  // Save the last step's details
+  if (currentStepIndex >= 0 && currentStepDetails.length > 0) {
+    steps[currentStepIndex].hoverDetails = {
+      title: steps[currentStepIndex].text,
+      category: getStepCategory(steps[currentStepIndex].text),
+      items: currentStepDetails
+    };
+  }
+  
   return steps;
+};
+
+/**
+ * Determine step category based on step text
+ */
+const getStepCategory = (stepText: string): string => {
+  const text = stepText.toLowerCase();
+  
+  if (text.includes('qualification') || text.includes('review') || text.includes('assess')) {
+    return 'Assessment';
+  } else if (text.includes('email') || text.includes('send') || text.includes('notify')) {
+    return 'Communication';
+  } else if (text.includes('create') || text.includes('setup') || text.includes('configure')) {
+    return 'System Setup';
+  } else if (text.includes('verify') || text.includes('check') || text.includes('validate')) {
+    return 'Verification';
+  } else if (text.includes('decision') || text.includes('if') || text.includes('qualify')) {
+    return 'Decision Point';
+  } else {
+    return 'Process';
+  }
 };
 
 /**

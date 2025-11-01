@@ -45,9 +45,56 @@ export const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
     icon: '👋',
     tags: ['customer', 'onboarding', 'welcome'],
     steps: [
-      { id: '1', text: 'Receive new customer registration', type: 'start', name: 'Start' },
-      { id: '2', text: 'Verify customer information and documentation', type: 'process', name: 'Verify Info' },
-      { id: '3', text: 'Create customer account in system', type: 'process', name: 'Create Account' },
+      { 
+        id: '1', 
+        text: 'Receive new customer registration', 
+        type: 'start', 
+        name: 'Start',
+        hoverDetails: {
+          title: 'Receive new customer registration',
+          category: 'Initial Contact',
+          items: [
+            'Check registration form completeness',
+            'Verify email address format',
+            'Confirm phone number validity',
+            'Review business type selection'
+          ]
+        }
+      },
+      { 
+        id: '2', 
+        text: 'Verify customer information and documentation', 
+        type: 'process', 
+        name: 'Verify Info',
+        hoverDetails: {
+          title: 'Verify customer information and documentation',
+          category: 'Documentation',
+          items: [
+            'Check government-issued ID',
+            'Verify address with utility bill',
+            'Confirm phone number',
+            'Validate email address',
+            'Review business registration (if applicable)'
+          ]
+        }
+      },
+      { 
+        id: '3', 
+        text: 'Create customer account in system', 
+        type: 'process', 
+        name: 'Create Account',
+        hoverDetails: {
+          title: 'Create customer account in system',
+          category: 'System Setup',
+          items: [
+            'Generate unique customer ID',
+            'Set up user permissions',
+            'Configure billing settings',
+            'Enable security features',
+            'Create customer dashboard'
+          ]
+        }
+      },
       { id: '4', text: 'Send welcome email with login credentials', type: 'process', name: 'Send Welcome Email' },
       { id: '5', text: 'Assign account manager', type: 'process', name: 'Assign Manager' },
       { id: '6', text: 'Schedule onboarding call', type: 'process', name: 'Schedule Call' },

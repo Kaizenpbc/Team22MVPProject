@@ -5,6 +5,82 @@
 
 import { WorkflowStep } from './workflowEditor';
 
+/**
+ * Extract hover details from SOP text for AI-parsed steps
+ */
+const extractHoverDetailsFromSOP = async (sopText: string, steps: WorkflowStep[]): Promise<WorkflowStep[]> => {
+  const lines = sopText.split('\n').filter(line => line.trim());
+  const stepsWithDetails = [...steps];
+  
+  let currentStepIndex = -1;
+  let currentStepDetails: string[] = [];
+  
+  lines.forEach((line) => {
+    // Check if this line matches any of our AI-parsed steps
+    const matchingStepIndex = steps.findIndex(step => 
+      line.toLowerCase().includes(step.text.toLowerCase()) ||
+      step.text.toLowerCase().includes(line.toLowerCase())
+    );
+    
+    if (matchingStepIndex >= 0) {
+      // Save previous step with its details
+      if (currentStepIndex >= 0 && currentStepDetails.length > 0) {
+        stepsWithDetails[currentStepIndex].hoverDetails = {
+          title: stepsWithDetails[currentStepIndex].text,
+          category: getStepCategory(stepsWithDetails[currentStepIndex].text),
+          items: currentStepDetails
+        };
+      }
+      
+      currentStepIndex = matchingStepIndex;
+      currentStepDetails = [];
+    } else {
+      // Check for bullet points or sub-items under the current step
+      const bulletMatch = line.match(/^\s*[•\-\*]\s*(.+)$/);
+      const subItemMatch = line.match(/^\s*o\s*(.+)$/);
+      
+      if ((bulletMatch || subItemMatch) && currentStepIndex >= 0) {
+        const detailText = (bulletMatch?.[1] || subItemMatch?.[1] || '').trim();
+        if (detailText) {
+          currentStepDetails.push(detailText);
+        }
+      }
+    }
+  });
+  
+  // Save the last step's details
+  if (currentStepIndex >= 0 && currentStepDetails.length > 0) {
+    stepsWithDetails[currentStepIndex].hoverDetails = {
+      title: stepsWithDetails[currentStepIndex].text,
+      category: getStepCategory(stepsWithDetails[currentStepIndex].text),
+      items: currentStepDetails
+    };
+  }
+  
+  return stepsWithDetails;
+};
+
+/**
+ * Determine step category based on step text
+ */
+const getStepCategory = (stepText: string): string => {
+  const text = stepText.toLowerCase();
+  
+  if (text.includes('qualification') || text.includes('review') || text.includes('assess')) {
+    return 'Assessment';
+  } else if (text.includes('email') || text.includes('send') || text.includes('notify')) {
+    return 'Communication';
+  } else if (text.includes('create') || text.includes('setup') || text.includes('configure')) {
+    return 'System Setup';
+  } else if (text.includes('verify') || text.includes('check') || text.includes('validate')) {
+    return 'Verification';
+  } else if (text.includes('decision') || text.includes('if') || text.includes('qualify')) {
+    return 'Decision Point';
+  } else {
+    return 'Process';
+  }
+};
+
 interface AIParseResponse {
   steps: WorkflowStep[];
   confidence: number;
@@ -88,8 +164,11 @@ Rules:
       name: step.text
     }));
 
+    // Extract hover details from original SOP text for AI-parsed steps
+    const stepsWithHoverDetails = await extractHoverDetailsFromSOP(sopText, stepsWithIds);
+
     return {
-      steps: stepsWithIds,
+      steps: stepsWithHoverDetails,
       confidence: aiResponse.confidence || 0.8,
       suggestions: aiResponse.suggestions || []
     };
