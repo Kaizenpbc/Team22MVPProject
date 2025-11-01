@@ -326,6 +326,222 @@ export const DOMAIN_KNOWLEDGE: { [key: string]: DomainTemplate } = {
       "Send orientation details",
       "Provide course schedule"
     ]
+  },
+
+  legal: {
+    name: "Legal Services",
+    description: "Law firm case management",
+    triggers: [
+      "Client consultation requested",
+      "New case opened",
+      "Legal matter referred"
+    ],
+    commonSteps: [
+      "Initial client consultation",
+      "Gather case information",
+      "Perform conflict check",
+      "Review applicable laws",
+      "Develop case strategy",
+      "File necessary documents",
+      "Conduct legal research",
+      "Prepare arguments",
+      "Represent client",
+      "Negotiate settlement",
+      "Finalize case resolution",
+      "Close case file"
+    ],
+    decisions: [
+      "Accept case?",
+      "Conflict of interest exists?",
+      "Settlement acceptable?",
+      "Proceed to trial?"
+    ],
+    communications: [
+      "Send engagement letter",
+      "Update client on progress",
+      "Notify of court dates",
+      "Send final case summary"
+    ],
+    industrySpecific: {
+      billing: [
+        "Track billable hours",
+        "Generate invoice",
+        "Process retainer payment"
+      ]
+    }
+  },
+
+  itsupport: {
+    name: "IT Support / Help Desk",
+    description: "Technical support and troubleshooting",
+    triggers: [
+      "Support ticket submitted",
+      "User calls help desk",
+      "System alert received"
+    ],
+    commonSteps: [
+      "Receive support request",
+      "Log ticket in system",
+      "Categorize issue priority",
+      "Assign to technician",
+      "Diagnose problem",
+      "Research solution",
+      "Implement fix",
+      "Test resolution",
+      "Document solution",
+      "Update user",
+      "Close ticket",
+      "Follow up with user"
+    ],
+    decisions: [
+      "Critical priority?",
+      "Escalation required?",
+      "Hardware replacement needed?",
+      "User satisfied?"
+    ],
+    communications: [
+      "Send ticket confirmation",
+      "Notify of assignment",
+      "Update on progress",
+      "Confirm resolution"
+    ],
+    industrySpecific: {
+      escalation: [
+        "Escalate to senior tech",
+        "Contact vendor support",
+        "Notify IT manager"
+      ]
+    }
+  },
+
+  marketing: {
+    name: "Marketing Campaign",
+    description: "Campaign planning and execution",
+    triggers: [
+      "Campaign approved",
+      "Product launch scheduled",
+      "Marketing budget allocated"
+    ],
+    commonSteps: [
+      "Define campaign objectives",
+      "Identify target audience",
+      "Develop creative concepts",
+      "Create campaign materials",
+      "Get stakeholder approval",
+      "Set up tracking systems",
+      "Launch campaign",
+      "Monitor performance metrics",
+      "Optimize based on data",
+      "Generate campaign report",
+      "Analyze ROI",
+      "Document learnings"
+    ],
+    decisions: [
+      "Budget approved?",
+      "Creative approved?",
+      "Performance meets targets?",
+      "Continue or pause?"
+    ],
+    communications: [
+      "Present campaign plan",
+      "Send progress updates",
+      "Share performance report",
+      "Deliver final results"
+    ],
+    industrySpecific: {
+      digital: [
+        "Set up ad campaigns",
+        "Configure tracking pixels",
+        "A/B test variations",
+        "Analyze conversion rates"
+      ]
+    }
+  },
+
+  realestate: {
+    name: "Real Estate Transaction",
+    description: "Property sale or purchase process",
+    triggers: [
+      "Property listed",
+      "Offer submitted",
+      "Buyer shows interest"
+    ],
+    commonSteps: [
+      "List property details",
+      "Schedule property showing",
+      "Receive purchase offer",
+      "Negotiate terms",
+      "Accept offer",
+      "Order property inspection",
+      "Review inspection report",
+      "Arrange financing",
+      "Order title search",
+      "Schedule closing date",
+      "Sign closing documents",
+      "Transfer ownership"
+    ],
+    decisions: [
+      "Offer acceptable?",
+      "Inspection issues found?",
+      "Financing approved?",
+      "Clear title?"
+    ],
+    communications: [
+      "Notify seller of offer",
+      "Update on inspection",
+      "Confirm closing details",
+      "Send congratulations"
+    ],
+    industrySpecific: {
+      contingencies: [
+        "Review contingencies",
+        "Remove contingencies",
+        "Extend deadline if needed"
+      ]
+    }
+  },
+
+  logistics: {
+    name: "Logistics & Shipping",
+    description: "Package delivery and tracking",
+    triggers: [
+      "Shipping request received",
+      "Pickup scheduled",
+      "Package arrived at facility"
+    ],
+    commonSteps: [
+      "Receive shipment details",
+      "Verify shipping address",
+      "Calculate shipping cost",
+      "Generate shipping label",
+      "Schedule pickup",
+      "Scan package at origin",
+      "Transport to hub",
+      "Sort by destination",
+      "Load onto delivery vehicle",
+      "Deliver to recipient",
+      "Obtain signature",
+      "Update tracking status"
+    ],
+    decisions: [
+      "Address valid?",
+      "Special handling required?",
+      "Delivery attempted?",
+      "Signature obtained?"
+    ],
+    communications: [
+      "Send pickup confirmation",
+      "Provide tracking number",
+      "Notify of delays",
+      "Confirm delivery"
+    ],
+    industrySpecific: {
+      exceptions: [
+        "Attempt redelivery",
+        "Hold at facility",
+        "Return to sender"
+      ]
+    }
   }
 };
 
@@ -360,7 +576,6 @@ export const findDomain = (userInput: string): DomainTemplate | null => {
     'ecommerce': 'retail',
     'store': 'retail',
     'customer': 'retail',
-    'shipping': 'retail',
     'employee': 'hr',
     'onboard': 'hr',
     'hire': 'hr',
@@ -384,7 +599,36 @@ export const findDomain = (userInput: string): DomainTemplate | null => {
     'school': 'education',
     'university': 'education',
     'college': 'education',
-    'course': 'education'
+    'course': 'education',
+    'lawyer': 'legal',
+    'attorney': 'legal',
+    'legal': 'legal',
+    'law': 'legal',
+    'case': 'legal',
+    'litigation': 'legal',
+    'it': 'itsupport',
+    'support': 'itsupport',
+    'helpdesk': 'itsupport',
+    'ticket': 'itsupport',
+    'technical': 'itsupport',
+    'troubleshoot': 'itsupport',
+    'marketing': 'marketing',
+    'campaign': 'marketing',
+    'advertising': 'marketing',
+    'promotion': 'marketing',
+    'brand': 'marketing',
+    'property': 'realestate',
+    'real estate': 'realestate',
+    'realtor': 'realestate',
+    'house': 'realestate',
+    'home': 'realestate',
+    'closing': 'realestate',
+    'shipping': 'logistics',
+    'delivery': 'logistics',
+    'warehouse': 'logistics',
+    'logistics': 'logistics',
+    'freight': 'logistics',
+    'transport': 'logistics'
   };
   
   for (const [keyword, domainKey] of Object.entries(keywordMap)) {

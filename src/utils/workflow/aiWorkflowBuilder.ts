@@ -24,14 +24,15 @@ export interface BuilderState {
  * Initialize workflow builder conversation
  */
 export const initializeBuilder = (): BuilderState => {
-  const examples = getAllDomains().slice(0, 6).map(d => `• ${d}`).join('\n     ');
+  const allDomains = getAllDomains();
+  const examples = allDomains.map(d => `     • ${d}`).join('\n');
   
   return {
     stage: 'domain',
     domain: null,
     messages: [{
       role: 'ai',
-      content: `Hi! I'll help you build a workflow from scratch. First, what industry or department is this for?\n\nCommon examples:\n     ${examples}\n     • Or describe your own...`,
+      content: `👋 Hi! I'm your AI Workflow Assistant!\n\nI'll help you build a complete workflow from scratch, even if you don't know all the steps. Just tell me what industry or type of process you need!\n\n🎯 I'm an expert in ${allDomains.length} industries:\n${examples}\n\n💡 **Examples:**\n     "automotive repair shop"\n     "IT help desk"\n     "real estate transaction"\n     "Or just describe what you do!"\n\nWhat workflow do you need?`,
       timestamp: new Date()
     }],
     generatedSteps: [],
@@ -74,7 +75,7 @@ export const processUserInput = (
       
       newState.messages.push({
         role: 'ai',
-        content: `Perfect! A ${domain.name.toLowerCase()} workflow typically includes:\n\n📋 TYPICAL FLOW:\n${stepsList}\n\nDoes this match your process, or is yours different? You can say:\n• "Looks good, use this"\n• "Add steps for [specific feature]"\n• "Remove [step name]"\n• Or describe your specific process`,
+        content: `🎯 Perfect! I know ${domain.name}!\n\nHere's a typical workflow I've created for you based on industry best practices:\n\n📋 **YOUR WORKFLOW (${newState.generatedSteps.length} steps):**\n${stepsList}\n\n✨ **What's next?**\nThis is a solid foundation, but you can customize it! You can:\n• ✓ "Looks good, use this" - I'll create it now!\n• ➕ "Add [feature]" - I'll add relevant steps\n• ➖ "Remove [step]" - I'll take it out\n• 📝 Or describe what's different about yours\n\nWhat would you like to do?`,
         timestamp: new Date()
       });
     } else {
@@ -91,12 +92,12 @@ export const processUserInput = (
     // User is refining the workflow
     const lowerInput = userInput.toLowerCase();
     
-    if (lowerInput.includes('looks good') || lowerInput.includes('use this') || lowerInput.includes('perfect')) {
+    if (lowerInput.includes('looks good') || lowerInput.includes('use this') || lowerInput.includes('perfect') || lowerInput.includes('sounds good')) {
       // User approved!
       newState.stage = 'complete';
       newState.messages.push({
         role: 'ai',
-        content: `Great! I'm creating your workflow now...\n✓ Generated ${newState.generatedSteps.length} workflow steps\n✓ Added decision points\n✓ Included ${state.domain?.communications.length || 0} communication steps\n\nYour workflow is ready!`,
+        content: `🎉 Excellent! Creating your professional workflow now...\n\n✅ Generated ${newState.generatedSteps.length} optimized workflow steps\n✅ Added ${newState.generatedSteps.filter(s => s.type === 'decision').length} decision points\n✅ Included ${state.domain?.communications.length || 0} communication touchpoints\n✅ Based on industry best practices\n\n🚀 Your workflow is ready!\n💰 Cost: 5 credits\n\nLoading your interactive flowchart...`,
         timestamp: new Date()
       });
     } else if (lowerInput.includes('add')) {
@@ -113,12 +114,12 @@ export const processUserInput = (
       );
       
       const stepsList = newState.generatedSteps
-        .map((step, i) => `     ${i + 1}. ${step.text}${additionalSteps.includes(step) ? ' ✨' : ''}`)
+        .map((step, i) => `     ${i + 1}. ${step.text}${additionalSteps.includes(step) ? ' ✨ NEW' : ''}`)
         .join('\n');
       
       newState.messages.push({
         role: 'ai',
-        content: `Got it! I've added steps for ${modification}:\n\n📋 UPDATED FLOW:\n${stepsList}\n\nAnything else to add or change?\n\nOr say "looks good" when ready.`,
+        content: `✅ Done! I've intelligently added ${additionalSteps.length} step${additionalSteps.length > 1 ? 's' : ''} for ${modification}:\n\n📋 **UPDATED WORKFLOW (${newState.generatedSteps.length} steps):**\n${stepsList}\n\n✨ = Newly added steps\n\n🤔 **What's next?**\n• Add more features\n• Remove something\n• Or say "looks good" to finalize!`,
         timestamp: new Date()
       });
     } else if (lowerInput.includes('remove')) {
