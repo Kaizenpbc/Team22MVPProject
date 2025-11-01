@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookTemplate, ArrowUpDown, BarChart3, MessageCircle } from 'lucide-react';
+import { BookTemplate, ArrowUpDown, BarChart3, MessageCircle, Sparkles } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import FileUploadComponent from '../core/FileUploadComponent.tsx';
 import WorkflowEditor from '../core/WorkflowEditor.tsx';
@@ -10,13 +10,14 @@ import WorkflowTemplateSelector from '../templates/WorkflowTemplateSelector';
 import WorkflowReorderingView from '../visualization/WorkflowReorderingView';
 import AnalyticsDashboard from '../analysis/AnalyticsDashboard';
 import WorkflowChatPanel from '../chat/WorkflowChatPanel';
+import WorkflowBuilderChat from '../chat/WorkflowBuilderChat';
 import GapDetectionPanel from '../analysis/GapDetectionPanel';
 import DuplicateDetectionPanel from '../analysis/DuplicateDetectionPanel';
 import { DomainAgnosticGapPanel } from '../analysis/DomainAgnosticGapPanel';
 import { WorkflowTemplate } from '../../../utils/workflow/workflowTemplates';
 import { runComprehensiveAnalysis, ComprehensiveAnalysis } from '../../../utils/workflow/comprehensiveWorkflowAnalysis';
 import { WorkflowStep } from '../../../utils/workflow/workflowEditor';
-import { hasEnoughCredits, useAIParse, useAIAnalysis, CREDIT_COSTS, getCreditBalance } from '../../../services/creditsService';
+import { hasEnoughCredits, useAIParse, useAIAnalysis, CREDIT_COSTS, getCreditBalance, deductCredits } from '../../../services/creditsService';
 import FullScreenWorkflow from '../FullScreenWorkflow';
 import StepOptimizationPanel from '../StepOptimizationPanel';
 
@@ -37,6 +38,7 @@ const UserWorkflowInterface: React.FC = () => {
   const [showChatPanel, setShowChatPanel] = useState(false);
   const [showFullScreen, setShowFullScreen] = useState(false);
   const [showStepOptimization, setShowStepOptimization] = useState(false);
+  const [showBuilderChat, setShowBuilderChat] = useState(false);
   const [comprehensiveAnalysis, setComprehensiveAnalysis] = useState<ComprehensiveAnalysis | null>(null);
   
   // Resizable panel state
@@ -149,6 +151,34 @@ const UserWorkflowInterface: React.FC = () => {
     setWorkflow(reorderedSteps);
     setSopText(reorderedSteps.map((step, i) => `${i + 1}. ${step.text}`).join('\n'));
     setShowReorderView(false);
+  };
+
+  // Handle workflow builder completion
+  const handleBuilderComplete = async (steps: WorkflowStep[]) => {
+    if (!user) {
+      alert('Please sign in to use AI features!');
+      return;
+    }
+
+    try {
+      // Deduct 5 credits for AI workflow building
+      await deductCredits(user.id, 5, 'AI Workflow Builder', 'Built workflow with AI assistance');
+      
+      // Set the workflow
+      setWorkflow(steps);
+      setSopText(steps.map((s, i) => `${i + 1}. ${s.text}`).join('\n'));
+      setShowBuilderChat(false);
+
+      // Show success message
+      const newBalance = await getCreditBalance(user.id);
+      alert(`✨ Workflow created successfully!\n\nCredits used: 5\nRemaining balance: ${newBalance.credits} credits`);
+      
+      // Auto-run analysis
+      setTimeout(() => runAnalysis(), 500);
+    } catch (error) {
+      console.error('Error completing workflow build:', error);
+      alert('Error creating workflow. Please try again.');
+    }
   };
 
   // Run comprehensive analysis (WITH CREDIT CHECK)
@@ -415,6 +445,15 @@ const UserWorkflowInterface: React.FC = () => {
             >
               <BookTemplate className="w-4 h-4" />
               📋 Templates
+            </button>
+            
+            <button
+              onClick={() => setShowBuilderChat(true)}
+              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2 shadow-md"
+              title="Build workflow from scratch with AI guidance"
+            >
+              <Sparkles className="w-4 h-4" />
+              🤖 Build with AI
             </button>
             
             {/* Workflow Enhancement Flow */}
@@ -749,6 +788,14 @@ const UserWorkflowInterface: React.FC = () => {
             setShowStepOptimization(false);
           }}
           onClose={() => setShowStepOptimization(false)}
+        />
+      )}
+
+      {/* AI Workflow Builder Chat */}
+      {showBuilderChat && (
+        <WorkflowBuilderChat
+          onComplete={handleBuilderComplete}
+          onClose={() => setShowBuilderChat(false)}
         />
       )}
     </div>
